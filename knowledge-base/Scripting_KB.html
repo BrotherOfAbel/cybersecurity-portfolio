@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Scripting Fundamentals KB</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#30363d;--accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;--accent5:#ffa657;
+  --text:#e6edf3;--muted:#7d8590;--tag-bg:#1f2937;--tag-text:#93c5fd;--hl:#1a3a5c;
+  --shadow:0 8px 32px rgba(0,0,0,.4);--radius:10px;--tr:.18s ease;}
+[data-theme="light"]{--bg:#f6f8fa;--surface:#fff;--surface2:#f0f2f5;--surface3:#e8eaed;
+  --border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#cf222e;--accent5:#bc4c00;
+  --text:#1f2328;--muted:#656d76;--tag-bg:#ddf4ff;--tag-text:#0969da;--hl:#ddf4ff;
+  --shadow:0 4px 16px rgba(0,0,0,.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+#sidebar{width:250px;min-width:250px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+#sb-head{padding:14px 14px 10px;border-bottom:1px solid var(--border);}
+#sb-head .logo{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+#sb-head h1{font-size:13px;font-weight:800;line-height:1.3;}
+#sb-head .by{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+#sw{padding:8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10;}
+#search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px 5px 26px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;transition:border-color var(--tr);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:7px center;}
+#search:focus{border-color:var(--accent);}#search::placeholder{color:var(--muted);}
+#nav{flex:1;overflow-y:auto;padding:4px 0 20px;}
+.ng{border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:2px;}
+.ng-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:8px 12px 3px;}
+.ni{display:flex;align-items:center;gap:6px;padding:4px 12px;font-size:11px;color:var(--muted);cursor:pointer;transition:all var(--tr);border-left:2px solid transparent;}
+.ni:hover{color:var(--text);background:var(--surface2);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:var(--hl);}
+.ni-icon{font-size:11px;flex-shrink:0;}.ni-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ni-count{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--surface3);padding:1px 4px;border-radius:8px;}
+#main{margin-left:250px;flex:1;display:flex;flex-direction:column;}
+#topbar{position:sticky;top:0;background:rgba(13,17,23,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 22px;display:flex;align-items:center;gap:8px;height:48px;z-index:50;}
+[data-theme="light"] #topbar{background:rgba(246,248,250,.94);}
+#bc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex:1;overflow:hidden;}
+#bc .sep{color:var(--border);}.cur{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);cursor:pointer;transition:all var(--tr);white-space:nowrap;}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent);}.tb-btn.active{background:var(--hl);border-color:var(--accent);color:var(--accent);}
+#content{padding:24px;flex:1;}
+#home-view{animation:fadeUp .3s ease;}
+.home-hero{margin-bottom:24px;}.home-hero .greeting{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:7px;}
+.home-hero h2{font-size:26px;font-weight:800;line-height:1.15;margin-bottom:6px;}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--sc-color,var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .25s;}
+.sc:hover{border-color:var(--sc-color,var(--accent));transform:translateY(-2px);box-shadow:var(--shadow);}.sc:hover::after{transform:scaleX(1);}
+.sc .s-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--sc-color,var(--accent));margin-bottom:4px;}
+.sc .s-name{font-size:12px;font-weight:700;margin-bottom:2px;}.sc .s-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+#section-view{display:none;animation:fadeUp .25s ease;}
+.sh{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.sh .sn{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;}
+.sh h2{font-size:22px;font-weight:800;margin-bottom:4px;}.sh .sm{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.sec-ctrl{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap;}
+.sec-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);cursor:pointer;transition:all var(--tr);}
+.sec-btn:hover{border-color:var(--accent);color:var(--accent);}
+#cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ca,var(--accent));opacity:0;transition:opacity var(--tr);}
+.card:hover{border-color:var(--ca,var(--accent));transform:translateY(-1px);box-shadow:var(--shadow);}.card:hover::before,.card.expanded::before{opacity:1;}
+.card.expanded{border-color:var(--ca,var(--accent));background:var(--surface2);}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;margin-bottom:5px;}
+.card-concept{font-size:13px;font-weight:700;}
+.card-toggle{font-size:14px;color:var(--muted);transition:transform var(--tr),color var(--tr);flex-shrink:0;}
+.card.expanded .card-toggle{transform:rotate(90deg);color:var(--ca,var(--accent));}
+.card-preview{font-size:11px;color:var(--muted);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card.expanded .card-preview{display:none;}
+.card-def{display:none;font-size:12px;color:var(--text);line-height:1.7;margin-top:9px;padding-top:9px;border-top:1px solid var(--border);}
+.card.expanded .card-def{display:block;}
+.card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;}
+.tag{background:var(--tag-bg);color:var(--tag-text);font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 5px;border-radius:4px;border:1px solid rgba(88,166,255,.15);}
+.tag.critical{background:rgba(247,129,102,.12);color:var(--accent3);border-color:rgba(247,129,102,.25);}
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);margin-bottom:14px;}
+.ref-table{width:100%;border-collapse:collapse;font-size:11px;}
+.ref-table thead th{background:var(--surface2);padding:8px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+.ref-table tbody tr{border-bottom:1px solid var(--border);transition:background var(--tr);}.ref-table tbody tr:last-child{border-bottom:none;}
+.ref-table tbody tr:hover{background:var(--surface2);}
+.ref-table td{padding:8px 12px;vertical-align:top;line-height:1.5;}
+.ref-table td:first-child{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent);white-space:nowrap;}
+.tbl-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px 6px 26px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;margin-bottom:12px;transition:border-color var(--tr);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:7px center;}
+.tbl-search:focus{border-color:var(--accent);}.tbl-search::placeholder{color:var(--muted);}
+#search-results{display:none;animation:fadeUp .25s ease;}
+.sr-hdr{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;}
+.sr-hdr span{color:var(--accent);}
+.sr-sl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:12px 0 5px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+mark{background:rgba(255,166,87,.2);color:var(--accent5);border-radius:2px;padding:0 1px;}
+
+    .code-wrap{margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+    .code-hdr{display:flex;justify-content:space-between;align-items:center;padding:5px 12px;background:var(--surface3);border-bottom:1px solid var(--border);}
+    .lang-badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+    .lang-badge.powershell{color:#2196F3;}.lang-badge.bash{color:#4caf50;}.lang-badge.python{color:#f39c12;}
+    .copy-btn{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);cursor:pointer;transition:all .15s;}
+    .copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .code-block{display:block;padding:14px 16px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;background:#0d1117;color:#e6edf3;white-space:pre;}
+    [data-theme="light"] .code-block{background:#1e1e2e;}
+    
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+<aside id="sidebar">
+  <div id="sb-head">
+    <div class="logo">// KB</div>
+    <h1>Scripting Fundamentals KB</h1>
+    <div class="by">Chris Kain · PowerShell · Bash · Python</div>
+  </div>
+  <div id="sw"><input type="text" id="search" placeholder="Search… (press /)" autocomplete="off" spellcheck="false"></div>
+  <nav id="nav"></nav>
+</aside>
+<main id="main">
+  <div id="topbar">
+    <div id="bc"><span>KB</span><span class="sep">/</span><span class="cur" id="bc-cur">Home</span></div>
+    <button class="tb-btn" onclick="startQuiz()">🎲 Quiz</button>
+    <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+  <div id="content">
+    <div id="home-view">
+      <div class="home-hero">
+        <div class="greeting">// KNOWLEDGE BASE</div>
+        <h2>Scripting Fundamentals KB</h2>
+        <p style="color:var(--muted);font-size:12px;margin-top:4px;">Chris Kain · PowerShell · Bash · Python</p>
+      </div>
+      <div id="lang-filter" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="tb-btn active" id="lf-all" onclick="setLangFilter('all')">All</button>
+      <button class="tb-btn" id="lf-powershell" onclick="setLangFilter('powershell')" style="color:#2196F3">💙 PowerShell</button>
+      <button class="tb-btn" id="lf-bash" onclick="setLangFilter('bash')" style="color:#4caf50">🐧 Bash</button>
+      <button class="tb-btn" id="lf-python" onclick="setLangFilter('python')" style="color:#f39c12">🐍 Python</button>
+    </div>
+      <div class="section-grid" id="home-grid"></div>
+    </div>
+    <div id="section-view">
+      <div class="sh" id="sec-hero"></div>
+      <div class="sec-ctrl" id="sec-ctrl"></div>
+      <div id="cards-grid"></div>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</main>
+<div id="qm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:500px;width:90%;text-align:center;box-shadow:var(--shadow);position:relative;">
+    <button onclick="closeQuiz()" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;">×</button>
+    <div id="q-sec" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px;"></div>
+    <div id="q-con" style="font-size:18px;font-weight:800;margin-bottom:14px;"></div>
+    <div id="q-tags" style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-bottom:12px;"></div>
+    <div id="q-rev" onclick="revealQuiz()" style="background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);margin-bottom:14px;cursor:pointer;line-height:1.6;"></div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button onclick="nextQuiz()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 16px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text);cursor:pointer;">Next →</button>
+      <button onclick="closeQuiz()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 16px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);cursor:pointer;">Done</button>
+    </div>
+  </div>
+</div>
+<script>
+const SECTIONS={"PS \u2013 Variables & Types": {"icon": "\ud83d\udc99", "color": "#0078d4", "lang": "powershell", "items": [{"c": "Variables & Data Types", "d": "PowerShell variables use $ prefix. Loosely typed \u2014 type is inferred. Type accelerators constrain values.", "code": "$name = 'Chris'\n$age = 30\n$pi = 3.14159\n$flag = $true\n$nothing = $null\n\n# Type-constrained\n[int]$count = 0\n[string]$msg = 'hello'\n[bool]$active = $true\n\n# Type checking\n$name.GetType().Name       # String\n$age -is [int]             # True\n\n# Type conversion\n[int]'42'                  # 42\n[string]42                 # '42'\n[datetime]'2024-01-01'    # DateTime object", "t": ["basics", "variables", "types"]}, {"c": "Strings", "d": "Double-quoted strings expand variables and expressions. Single-quoted strings are literal. Here-strings handle multiline.", "code": "$name = 'Chris'\n\n# Double quotes = expandable\n\"Hello, $name!\"            # Hello, Chris!\n\"2 + 2 = $(2+2)\"          # 2 + 2 = 4\n\n# Single quotes = literal\n'Hello, $name'             # Hello, $name\n\n# Here-strings (multiline)\n$text = @\"\nLine 1: $name\nLine 2: $(Get-Date -Format 'yyyy-MM-dd')\n\"@\n\n# String methods\n$s = 'Hello World'\n$s.ToUpper()               # HELLO WORLD\n$s.Replace('World','PS')  # Hello PS\n$s.Split(' ')              # @('Hello','World')\n$s.Trim()                  # Remove whitespace\n$s.StartsWith('Hello')    # True\n$s.Substring(6,5)         # World\n$s.Length                  # 11\n-join ('a','b','c')        # abc", "t": ["strings", "basics"]}, {"c": "Arrays", "d": "Zero-indexed. @() creates arrays. Range operator .. creates integer sequences. Strongly-typed arrays use [type[]].", "code": "# Create arrays\n$arr = @(1, 2, 3, 'four', $true)\n$arr = 1, 2, 3             # Shorter syntax\n$range = 1..10             # Range: 1 through 10\n\n# Access elements\n$arr[0]                    # First: 1\n$arr[-1]                   # Last element\n$arr[1..3]                 # Slice\n\n# Array operations\n$arr += 'five'             # Append (creates new array)\n$arr.Count                 # Length\n$arr.Contains(2)           # True\n$arr -contains 2           # True (operator form)\n$arr -join ', '            # Join to string\n\n# Strongly-typed\n[int[]]$nums = @(1, 2, 3)\n[string[]]$names = 'Alice','Bob'", "t": ["arrays", "basics"]}, {"c": "Hashtables", "d": "Key-value pairs. Dot notation and bracket notation both work. [ordered] hashtables maintain insertion order.", "code": "$user = @{\n    Name   = 'Chris'\n    Role   = 'Admin'\n    Age    = 30\n    Active = $true\n}\n\n# Access values\n$user['Name']              # Chris\n$user.Name                 # Chris (dot notation)\n\n# Modify\n$user['Email'] = 'c@ex.com'  # Add\n$user.Role = 'ISO'            # Update\n$user.Remove('Age')           # Delete\n\n# Check and iterate\n$user.ContainsKey('Name')  # True\n$user.Keys                 # All keys\n$user.Values               # All values\nforeach ($kv in $user.GetEnumerator()) {\n    \"$($kv.Key) = $($kv.Value)\"\n}\n\n# Ordered hashtable\n$ordered = [ordered]@{ A=1; B=2; C=3 }", "t": ["hashtables", "dictionaries", "basics"]}, {"c": "Special Variables", "d": "PowerShell has many built-in automatic variables. Know these cold \u2014 they appear everywhere in scripts and pipeline work.", "code": "$_                    # Current pipeline object\n$?                    # Success of last command (bool)\n$LASTEXITCODE         # Exit code of last native command\n$Error                # Array of recent errors\n$Error[0]             # Most recent error\n\n# Error preference\n$ErrorActionPreference = 'Stop'               # All errors terminate\n$ErrorActionPreference = 'SilentlyContinue'   # Suppress all\n$ErrorActionPreference = 'Continue'           # Default\n\n# Environment variables via $env:\n$env:USERNAME\n$env:COMPUTERNAME\n$env:USERPROFILE          # Home directory\n$env:PATH\n\n# Script context\n$PSVersionTable           # PS version info\n$PSScriptRoot             # Directory of current script\n$MyInvocation.MyCommand.Path\n\n$null                     # Null value\n$true / $false            # Boolean values\n$args                     # Script arguments array", "t": ["variables", "automatic", "special"]}]}, "PS \u2013 Control Flow": {"icon": "\ud83d\udc99", "color": "#0078d4", "lang": "powershell", "items": [{"c": "If / ElseIf / Else & Operators", "d": "PowerShell comparison operators use -eq, -ne, -gt etc. (not ==, >, <). Case-insensitive by default; prefix c for case-sensitive (e.g. -ceq).", "code": "$x = 15\n\n# If/elseif/else\nif ($x -gt 20) {\n    'Greater than 20'\n} elseif ($x -gt 10) {\n    'Between 11 and 20'\n} else {\n    '10 or less'\n}\n\n# Comparison operators\n-eq   # Equal\n-ne   # Not equal\n-gt   # Greater than\n-lt   # Less than\n-ge   # Greater than or equal\n-le   # Less than or equal\n-like # Wildcard  ('Chris' -like 'Ch*')\n-match # Regex    ('foo123' -match '\\d+')\n-in   # Collection member  (5 -in @(1,5,10))\n-contains # Collection has value\n\n# Logical operators\n-and  -or  -not  -xor\n! $flag         # Shorthand Not\n\n# Null/empty checks\n[string]::IsNullOrEmpty($str)\n$null -eq $val\n$val -ne $null", "t": ["control flow", "conditionals", "operators"]}, {"c": "Switch", "d": "Powerful multi-branch matching. Can match strings, numbers, regex, wildcards, and script blocks. Unlike C#, multiple cases can match.", "code": "$day = 'Monday'\n\n# Basic switch\nswitch ($day) {\n    'Monday'  { 'Start of week' }\n    'Friday'  { 'End of week' }\n    default   { 'Middle of week' }\n}\n\n# Switch with -Wildcard\nswitch -Wildcard ($filename) {\n    '*.log'  { 'Log file' }\n    '*.csv'  { 'CSV file' }\n    '*.ps1'  { 'PowerShell script' }\n    default  { 'Unknown type' }\n}\n\n# Switch with -Regex\nswitch -Regex ($ip) {\n    '^10\\.'        { 'RFC1918 10.x' }\n    '^192\\.168\\.' { 'RFC1918 192.168.x' }\n    '^172\\.1[6-9]\\.' { 'RFC1918 172.16-19.x' }\n    default        { 'Public IP' }\n}\n\n# Script block condition\nswitch ($x) {\n    { $_ -gt 100 } { 'Large' }\n    { $_ -gt 50  } { 'Medium' }\n    default        { 'Small' }\n}", "t": ["control flow", "switch", "pattern matching"]}, {"c": "Loops", "d": "Four main loop types. ForEach-Object is the pipeline-idiomatic approach. Use break and continue for loop control.", "code": "# ForEach (most common for collections)\nforeach ($user in $users) {\n    Write-Output $user.Name\n}\n\n# For (when you need an index)\nfor ($i = 0; $i -lt 10; $i++) {\n    \"Item $i\"\n}\n\n# While\n$count = 0\nwhile ($count -lt 5) {\n    $count++\n    Write-Output $count\n}\n\n# Do-While (runs at least once)\ndo {\n    $input = Read-Host 'Enter Y to continue'\n} while ($input -ne 'Y')\n\n# ForEach-Object (pipeline)\n1..10 | ForEach-Object { $_ * 2 }\nGet-Process | ForEach-Object { $_.ProcessName }\n\n# Loop control\nforeach ($item in $collection) {\n    if ($item -eq 'skip') { continue }  # Next iteration\n    if ($item -eq 'done') { break }     # Exit loop\n}\n\n# Range loops\n1..5 | Where-Object { $_ % 2 -eq 1 }  # Odd numbers", "t": ["control flow", "loops", "iteration"]}]}, "PS \u2013 Functions & Errors": {"icon": "\ud83d\udc99", "color": "#0078d4", "lang": "powershell", "items": [{"c": "Basic Functions", "d": "Use verb-noun naming (Get-Item, Set-Config, Test-Connection). param() block defines parameters. return is optional \u2014 last expression is returned.", "code": "# Simple function\nfunction Get-Greeting {\n    param(\n        [string]$Name = 'World'\n    )\n    return \"Hello, $Name!\"\n}\nGet-Greeting                   # Hello, World!\nGet-Greeting -Name 'Chris'    # Hello, Chris!\n\n# Multiple params with types\nfunction New-UserReport {\n    param(\n        [Parameter(Mandatory=$true)]\n        [string]$Username,\n\n        [string]$Domain = 'corp.local',\n        [int]$DaysInactive = 90,\n        [switch]$IncludeDisabled\n    )\n\n    $filter = \"SamAccountName -eq '$Username'\"\n    $results = Get-ADUser -Filter $filter -Properties *\n    return $results\n}\n\n# Splatting (pass params as hashtable)\n$params = @{\n    Username        = 'jsmith'\n    DaysInactive    = 30\n    IncludeDisabled = $true\n}\nNew-UserReport @params", "t": ["functions", "basics", "parameters"]}, {"c": "Advanced Functions (CmdletBinding)", "d": "[CmdletBinding()] makes a function behave like a compiled cmdlet \u2014 adds -Verbose, -Debug, -WhatIf, -Confirm support and pipeline input handling.", "code": "function Invoke-SecurityCheck {\n    [CmdletBinding(SupportsShouldProcess=$true)]\n    param(\n        [Parameter(Mandatory=$true,\n                   ValueFromPipeline=$true)]\n        [string[]]$ComputerName,\n\n        [ValidateSet('Basic','Full','Network')]\n        [string]$CheckType = 'Basic',\n\n        [ValidateRange(1,65535)]\n        [int]$Port = 445\n    )\n\n    begin {\n        Write-Verbose \"Starting security check: $CheckType\"\n        $results = @()\n    }\n\n    process {\n        foreach ($computer in $ComputerName) {\n            Write-Verbose \"Checking: $computer\"\n            if ($PSCmdlet.ShouldProcess($computer,'Check')) {\n                $results += [PSCustomObject]@{\n                    Computer = $computer\n                    Status   = 'Checked'\n                    Time     = Get-Date\n                }\n            }\n        }\n    }\n\n    end {\n        Write-Verbose \"Done. Count: $($results.Count)\"\n        return $results\n    }\n}\n\n# Usage \u2014 pipeline, -Verbose, -WhatIf all work\n'Server01','Server02' | Invoke-SecurityCheck -CheckType Full -Verbose", "t": ["functions", "advanced", "CmdletBinding", "pipeline"]}, {"c": "Error Handling", "d": "Try/Catch/Finally for structured errors. -ErrorAction Stop converts non-terminating errors to terminating so catch can handle them.", "code": "try {\n    $result = Get-Item 'C:\\missing' -ErrorAction Stop\n} catch [System.IO.FileNotFoundException] {\n    Write-Error \"File not found: $($_.Exception.Message)\"\n} catch [System.UnauthorizedAccessException] {\n    Write-Error \"Access denied: $($_.Exception.Message)\"\n} catch {\n    Write-Error \"Unexpected: $($_.Exception.GetType().Name)\"\n} finally {\n    Write-Output 'Cleanup runs regardless'\n}\n\n# Error preference\n$ErrorActionPreference = 'Stop'            # All errors terminate\n$ErrorActionPreference = 'Continue'        # Default\n$ErrorActionPreference = 'SilentlyContinue' # Suppress output\n\n# Custom errors\nthrow 'Custom error message'\nthrow [System.ArgumentException]::new('Bad argument')\nWrite-Error 'Non-terminating error'\n\n# Check success\nif (-not $?) { Write-Warning 'Previous command failed' }\n$Error[0].Exception.Message   # Most recent error message\n$Error.Clear()                 # Clear error history", "t": ["error handling", "try/catch", "exceptions"]}]}, "PS \u2013 Pipeline & Objects": {"icon": "\ud83d\udc99", "color": "#0078d4", "lang": "powershell", "items": [{"c": "Pipeline & Core Cmdlets", "d": "PowerShell passes objects (not text) through the pipeline. Where-Object filters. Select-Object projects. Sort-Object sorts. ForEach-Object transforms.", "code": "# Where-Object (filter)\nGet-Process | Where-Object { $_.CPU -gt 100 }\nGet-Process | Where-Object CPU -gt 100     # Simplified\nGet-Service | Where-Object Status -eq 'Running'\n\n# Select-Object (project)\nGet-Process | Select-Object Name, CPU, Id\nGet-Process | Select-Object -First 10\nGet-Process | Select-Object -Last 5\nGet-Process | Select-Object -Unique Company\n\n# Sort-Object\nGet-Process | Sort-Object CPU -Descending\nGet-Process | Sort-Object CPU -Desc | Select-Object -First 10\n\n# Group-Object\nGet-Service | Group-Object Status\nGet-Process | Group-Object Company | Sort-Object Count -Desc\n\n# Measure-Object\nGet-ChildItem C:\\ | Measure-Object Length -Sum -Average -Max\nGet-Content log.txt | Measure-Object -Line -Word\n\n# ForEach-Object\nGet-Process | ForEach-Object {\n    [PSCustomObject]@{\n        Name   = $_.ProcessName\n        MemMB  = [math]::Round($_.WorkingSet/1MB,1)\n    }\n}", "t": ["pipeline", "filtering", "objects"]}, {"c": "Custom Objects & Calculated Properties", "d": "Create PSCustomObjects for structured output. Calculated properties in Select-Object use @{N=;E=} hashtables.", "code": "# Calculated properties\nGet-Process | Select-Object Name,\n    @{N='CPUSecs'; E={[math]::Round($_.CPU,2)}},\n    @{N='MemMB';   E={[math]::Round($_.WorkingSet/1MB,1)}}\n\n# Create custom object\n$obj = [PSCustomObject]@{\n    Server    = 'SRV01'\n    Status    = 'Online'\n    LastCheck = Get-Date\n    OpenPorts = @(80, 443)\n}\n\n# Build object array (using foreach pipeline)\n$servers = 'SRV01','SRV02','SRV03'\n$report = foreach ($server in $servers) {\n    [PSCustomObject]@{\n        Name    = $server\n        Ping    = Test-Connection $server -Count 1 -Quiet\n        Checked = Get-Date\n    }\n}\n\n# Export to CSV/HTML\n$report | Export-Csv 'report.csv' -NoTypeInformation\n$report | ConvertTo-Html -Title 'Server Status' |\n    Out-File 'report.html'", "t": ["pipeline", "custom objects", "reporting"]}]}, "PS \u2013 File & Data": {"icon": "\ud83d\udc99", "color": "#0078d4", "lang": "powershell", "items": [{"c": "File Operations", "d": "Get-Content, Set-Content, Add-Content for text files. Test-Path checks existence. Get-ChildItem lists files.", "code": "# Read\n$content = Get-Content 'C:\\file.txt'          # String array (per line)\n$raw     = Get-Content 'C:\\file.txt' -Raw     # Single string\n$errors  = Get-Content 'C:\\log.txt' | Select-String 'ERROR'\n\n# Write\nSet-Content 'C:\\file.txt' -Value 'Hello'       # Overwrite\nAdd-Content 'C:\\file.txt' -Value 'New line'    # Append\n'Line1','Line2' | Set-Content 'C:\\file.txt'    # From pipeline\n\n# File system ops\nTest-Path 'C:\\folder'              # Exists? True/False\nNew-Item 'C:\\folder' -ItemType Directory -Force\nCopy-Item 'C:\\src\\*' 'C:\\dst\\' -Recurse\nMove-Item 'C:\\old.txt' 'C:\\new.txt'\nRemove-Item 'C:\\temp\\*' -Recurse -Force\nGet-ChildItem 'C:\\logs' -Filter '*.log' -Recurse\n\n# File info\n$f = Get-Item 'C:\\file.txt'\n$f.Length          # Bytes\n$f.LastWriteTime   # Last modified\n$f.FullName        # Full path\n\n# IR: recently modified files\nGet-ChildItem C:\\ -Recurse -EA SilentlyContinue |\n    Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-1) } |\n    Sort-Object LastWriteTime -Descending", "t": ["files", "filesystem", "IO"]}, {"c": "CSV & JSON", "d": "Import-Csv / Export-Csv for tabular data. ConvertFrom-Json / ConvertTo-Json for APIs and config files.", "code": "# CSV\n$users = Import-Csv 'users.csv'\n$users | Where-Object { $_.Department -eq 'IT' }\n$data  | Export-Csv 'out.csv' -NoTypeInformation\n$data  | Export-Csv 'out.csv' -Append -NoTypeInformation\n\n# JSON \u2014 from file\n$config = Get-Content 'config.json' -Raw | ConvertFrom-Json\n$config.ServerName\n$config.Settings.Timeout\n\n# JSON \u2014 to file\n$config | ConvertTo-Json -Depth 5 | Set-Content 'config.json'\n\n# JSON \u2014 inline\n$obj   = [PSCustomObject]@{ Name='Chris'; Role='Admin' }\n$json  = $obj | ConvertTo-Json          # \u2192 JSON string\n$obj2  = $json | ConvertFrom-Json       # JSON string \u2192 object\n\n# Hashtable to JSON\n@{ Server='SRV01'; Port=443 } | ConvertTo-Json\n\n# REST API call\n$response = Invoke-RestMethod 'https://api.example.com/data' `\n    -Headers @{ Authorization = \"Bearer $token\" }\n$response.data | Select-Object name, status", "t": ["CSV", "JSON", "data", "REST API"]}]}, "PS \u2013 Security & IR": {"icon": "\ud83d\udc99", "color": "#0078d4", "lang": "powershell", "items": [{"c": "Event Log Queries", "d": "Get-WinEvent with FilterHashtable is fast. Avoid Get-EventLog (deprecated). FilterHashtable pushes filtering to the engine \u2014 much faster than pipeline Where-Object.", "code": "# Specific event ID in last 24h\nGet-WinEvent -FilterHashtable @{\n    LogName   = 'Security'\n    Id        = 4625           # Failed logon\n    StartTime = (Get-Date).AddHours(-24)\n} | Select-Object TimeCreated,\n    @{N='User';  E={$_.Properties[5].Value}},\n    @{N='Source';E={$_.Properties[19].Value}}\n\n# Multiple IDs (account changes)\nGet-WinEvent -FilterHashtable @{\n    LogName   = 'Security'\n    Id        = @(4720,4726,4738)  # Create/delete/modify\n    StartTime = (Get-Date).AddDays(-7)\n}\n\n# PowerShell script block logging (4104)\nGet-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |\n    Where-Object { $_.Id -eq 4104 -and\n                   $_.Message -match 'Invoke-Expression|IEX|-enc' }\n\n# Sysmon process create (Event 1)\nGet-WinEvent -LogName 'Microsoft-Windows-Sysmon/Operational' |\n    Where-Object { $_.Id -eq 1 -and\n                   $_.Message -match 'powershell.*-enc' }\n\n# Export for analysis\nGet-WinEvent -LogName Security |\n    Export-Csv 'sec_events.csv' -NoTypeInformation", "t": ["event logs", "IR", "security", "threat hunting"]}, {"c": "Process & Network Investigation", "d": "Core IR triage commands \u2014 identify unexpected processes, network connections, and correlate PIDs to process names.", "code": "# Top CPU consumers\nGet-Process | Sort-Object CPU -Desc | Select-Object -First 20 |\n    Select-Object Name, Id, CPU, WorkingSet, Path\n\n# Processes with command line\nGet-CimInstance Win32_Process |\n    Select-Object Name, ProcessId, ParentProcessId, CommandLine |\n    Sort-Object ProcessId\n\n# Established network connections\nGet-NetTCPConnection -State Established |\n    Select-Object LocalAddress, LocalPort,\n                  RemoteAddress, RemotePort, OwningProcess |\n    Sort-Object RemoteAddress\n\n# Correlate PID to process name\nGet-NetTCPConnection -State Established | ForEach-Object {\n    $proc = Get-Process -Id $_.OwningProcess -EA SilentlyContinue\n    [PSCustomObject]@{\n        ProcessName = $proc.Name\n        LocalPort   = $_.LocalPort\n        RemoteIP    = $_.RemoteAddress\n        RemotePort  = $_.RemotePort\n    }\n}\n\n# What's listening (attack surface)\nGet-NetTCPConnection -State Listen |\n    Select-Object LocalAddress, LocalPort, OwningProcess |\n    Sort-Object LocalPort", "t": ["IR", "process", "network", "threat hunting"]}, {"c": "Persistence & Registry", "d": "Check startup locations and scheduled tasks \u2014 primary persistence mechanisms. Registry Run keys and WMI subscriptions are attacker favorites.", "code": "# Scheduled tasks (active, show actions)\nGet-ScheduledTask | Where-Object State -ne 'Disabled' |\n    ForEach-Object {\n        $actions = $_.Actions | ForEach-Object {\n            \"$($_.Execute) $($_.Arguments)\"\n        }\n        [PSCustomObject]@{\n            Name   = $_.TaskName\n            Action = $actions -join '; '\n            RunAs  = $_.Principal.UserId\n        }\n    } | Where-Object {\n        $_.Action -match 'powershell|cmd|wscript|mshta|certutil'\n    }\n\n# Registry Run keys\n$runKeys = @(\n    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',\n    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce',\n    'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'\n)\n$runKeys | ForEach-Object { Get-ItemProperty $_ -EA SilentlyContinue }\n\n# Services (attackers install malicious services)\nGet-Service | Where-Object Status -eq 'Running' |\n    Select-Object Name, DisplayName, StartType | Sort-Object Name\n\n# WMI subscriptions (advanced persistence)\nGet-WMIObject -NS root/subscription -Class __EventFilter\nGet-WMIObject -NS root/subscription -Class __EventConsumer", "t": ["persistence", "IR", "threat hunting", "scheduled tasks"]}, {"c": "Active Directory Queries", "d": "Import-Module ActiveDirectory (RSAT required). Essential for access reviews, incident response, and compliance auditing.", "code": "Import-Module ActiveDirectory\n\n# Stale user accounts (no login in 90+ days)\nGet-ADUser -Filter {Enabled -eq $true} -Properties LastLogonDate |\n    Where-Object {\n        $_.LastLogonDate -lt (Get-Date).AddDays(-90) -or\n        $null -eq $_.LastLogonDate\n    } | Select-Object Name, SamAccountName, LastLogonDate\n\n# Domain Admins membership\nGet-ADGroupMember 'Domain Admins' -Recursive |\n    Get-ADUser -Properties Title, Department, LastLogonDate |\n    Select-Object Name, SamAccountName, Title, LastLogonDate\n\n# Password never expires (compliance risk)\nGet-ADUser -Filter {PasswordNeverExpires -eq $true -and Enabled -eq $true} |\n    Select-Object Name, SamAccountName, DistinguishedName\n\n# Recently created accounts (IR: attacker-created?)\nGet-ADUser -Filter * -Properties Created |\n    Where-Object { $_.Created -gt (Get-Date).AddDays(-7) } |\n    Select-Object Name, SamAccountName, Created, Enabled\n\n# Disable compromised account\nDisable-ADAccount -Identity 'compromised_user'\nSet-ADAccountPassword -Identity 'compromised_user' -Reset `\n    -NewPassword (ConvertTo-SecureString 'Temp!Pass2024' -AsPlainText -Force)", "t": ["Active Directory", "IAM", "IR", "compliance"]}]}, "Bash \u2013 Variables & Flow": {"icon": "\ud83d\udc27", "color": "#4caf50", "lang": "bash", "items": [{"c": "Variables & Quoting", "d": "No spaces around =. Double quotes allow expansion, single quotes are literal. $() for command substitution. (()) for arithmetic.", "code": "#!/bin/bash\n\n# Variables (NO spaces around =)\nname='Chris'\nage=30\n\n# Double quotes: variables expand\necho \"Hello, $name!\"\necho \"Age next year: $((age + 1))\"\n\n# Single quotes: literal (no expansion)\necho 'Hello, $name'       # Literal: Hello, $name\n\n# Command substitution\ntoday=$(date +%Y-%m-%d)\nip=$(hostname -I | awk '{print $1}')\nusercount=$(wc -l < /etc/passwd)\n\n# Arithmetic\nresult=$((10 + 5))\n((count++))\necho $((10 % 3))           # Modulo: 1\n\n# Readonly\nreadonly PI=3.14159\n\n# Export to child processes\nexport MY_VAR='value'\n\n# Special variables\n$0    # Script name\n$1    # First argument\n$@    # All arguments as separate strings\n$#    # Number of arguments\n$?    # Exit status of last command (0=success)\n$$    # Current process PID", "t": ["bash", "variables", "quoting", "basics"]}, {"c": "If / Elif / Else", "d": "Bash uses [ ] or [[ ]] for conditions. [[ ]] is bash-specific but safer (no word splitting issues). Spaces inside brackets are required.", "code": "#!/bin/bash\n\n# [ ] POSIX-compatible\nif [ -f '/etc/passwd' ]; then\n    echo 'File exists'\nfi\n\n# If/elif/else\nif [ \"$user\" = 'root' ]; then\n    echo 'Root user'\nelif [ -d '/opt/myapp' ]; then\n    echo 'App dir exists'\nelse\n    echo 'Neither'\nfi\n\n# [[ ]] bash extended test (preferred)\nif [[ \"$name\" == 'Chris' && $age -gt 18 ]]; then\n    echo 'Adult named Chris'\nfi\n\n# File test operators\n[ -f file ]      # Regular file exists\n[ -d dir ]       # Directory exists\n[ -e path ]      # Path exists (any type)\n[ -r file ]      # File is readable\n[ -x file ]      # File is executable\n\n# String tests\n[ -z \"$str\" ]    # String is empty\n[ -n \"$str\" ]    # String is non-empty\n[ \"$a\" = \"$b\" ]  # String equality\n\n# Numeric tests\n[ $n -eq 10 ]    # Equal\n[ $n -gt 10 ]    # Greater than\n[ $n -lt 10 ]    # Less than", "t": ["bash", "conditionals", "control flow"]}, {"c": "Loops", "d": "For, while, and until loops. Always double-quote variables. Read file line-by-line with while IFS= read -r.", "code": "#!/bin/bash\n\n# For loop over a list\nfor user in alice bob charlie; do\n    echo \"Processing: $user\"\ndone\n\n# For loop over files (glob)\nfor logfile in /var/log/*.log; do\n    echo \"Checking: $logfile\"\n    wc -l \"$logfile\"\ndone\n\n# C-style for\nfor ((i=0; i<10; i++)); do\n    echo \"Count: $i\"\ndone\n\n# While loop\ncount=0\nwhile [ $count -lt 5 ]; do\n    echo \"Count: $count\"\n    ((count++))\ndone\n\n# Read file line-by-line (IFS= preserves whitespace, -r no backslash processing)\nwhile IFS= read -r line; do\n    echo \"Line: $line\"\ndone < /var/log/auth.log\n\n# Process command output\nwhile IFS= read -r ip; do\n    ping -c 1 -W 1 \"$ip\" &>/dev/null && echo \"$ip UP\"\ndone < ip_list.txt\n\n# Loop control\nfor item in \"${arr[@]}\"; do\n    [ \"$item\" = 'skip' ] && continue  # Next\n    [ \"$item\" = 'stop' ] && break     # Exit\n    echo \"$item\"\ndone", "t": ["bash", "loops", "control flow"]}, {"c": "Functions & Error Safety", "d": "Functions must be defined before use. local scopes variables. Use set -euo pipefail for robust scripts that fail loudly.", "code": "#!/bin/bash\nset -euo pipefail  # Exit on error, undefined vars, pipe failures\n\n# Function definition\ncheck_service() {\n    local service=\"$1\"           # local = function-scoped\n    local required=${2:-true}    # Default value\n\n    if systemctl is-active --quiet \"$service\"; then\n        echo \"[OK] $service is running\"\n        return 0\n    else\n        echo \"[FAIL] $service is not running\"\n        return 1\n    fi\n}\n\n# Call and check exit code\ncheck_service 'sshd'\nif [ $? -eq 0 ]; then echo 'SSH fine'; fi\n\n# Capture OUTPUT (not return code)\nget_primary_ip() {\n    hostname -I | awk '{print $1}'\n}\nMY_IP=$(get_primary_ip)\necho \"IP: $MY_IP\"\n\n# Error handling with trap\ntrap 'echo \"Error on line $LINENO\" >&2' ERR\ntrap 'cleanup' EXIT  # Always runs\n\ncleanup() {\n    rm -f /tmp/my_temp_file\n    echo 'Cleanup complete'\n}", "t": ["bash", "functions", "error handling"]}]}, "Bash \u2013 Text Processing & IR": {"icon": "\ud83d\udc27", "color": "#4caf50", "lang": "bash", "items": [{"c": "grep \u2014 Search & Filter", "d": "Primary text search tool. Use -E for extended regex, -P for Perl regex. Essential for log analysis.", "code": "# Basic search\ngrep 'Failed password' /var/log/auth.log\n\n# Key flags\ngrep -i 'error' file         # Case-insensitive\ngrep -r 'password' /etc/     # Recursive\ngrep -v '^#' /etc/sshd_config # Invert (exclude)\ngrep -c 'Failed' auth.log    # Count matching lines\ngrep -n 'pattern' file       # Show line numbers\ngrep -l 'pattern' /etc/*     # Show matching filenames only\ngrep -A 3 'Error' file       # 3 lines AFTER match\ngrep -B 3 'Error' file       # 3 lines BEFORE match\ngrep -C 3 'Error' file       # 3 lines context both sides\n\n# Extended regex\ngrep -E 'Failed|refused|denied' auth.log\ngrep -E '[0-9]{1,3}(\\.[0-9]{1,3}){3}' file  # IPv4\n\n# IR: top failed-login source IPs\ngrep 'Failed password' /var/log/auth.log | \\\n    awk '{print $11}' | \\\n    sort | uniq -c | sort -rn | head -20\n\n# Find sensitive strings in configs\ngrep -r -i 'password\\|secret\\|api_key' /etc/ 2>/dev/null", "t": ["bash", "grep", "log analysis", "IR"]}, {"c": "awk & sed", "d": "awk processes field-by-field ($1, $2... are fields, $0 is entire line). sed transforms streams \u2014 substitute, delete, extract.", "code": "# \u2500\u2500 AWK \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n# Print specific columns\nawk '{print $1, $3}' file\nawk -F: '{print $1, $3}' /etc/passwd   # Custom delimiter\nawk -F, '{print $2}' data.csv           # CSV column 2\n\n# Built-in variables\n# $NF = last field, NR = line number, NF = field count\nawk '{print NR, $NF}' file   # Number lines, print last field\n\n# Filtering\nawk '$3 > 1000' /etc/passwd              # Lines where field 3 > 1000\nawk '/Failed/ {print $0}' file           # Lines matching pattern\nawk '!/^#/ {print}' /etc/sshd_config    # Exclude comment lines\n\n# Aggregation\nawk '{sum += $5} END {print \"Total:\", sum}' data.txt\nawk '{count[$1]++} END {\n    for(ip in count) print count[ip], ip\n}' access.log | sort -rn | head\n\n# \u2500\u2500 SED \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nsed 's/old/new/g' file                 # Replace all\nsed -i.bak 's/old/new/g' file         # In-place (+ backup)\nsed '/^#/d' file                       # Delete comment lines\nsed '/^$/d' file                       # Delete blank lines\nsed -n '10,20p' file                   # Print lines 10-20\nsed -n 's/^Port //p' /etc/sshd_config # Extract value", "t": ["bash", "awk", "sed", "text processing", "log analysis"]}, {"c": "Security & IR One-Liners", "d": "Essential commands for incident response triage \u2014 network connections, processes, persistence, users, and log analysis.", "code": "#!/bin/bash\n# IR Triage One-Liners\n\n# \u2500\u2500 NETWORK \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nss -tulpn                              # Listening ports with PIDs\nss -tnp | grep ESTABLISHED            # Established connections\nlsof -i :22                           # Process using port 22\nlsof -p 1234                          # All open files by PID\n\n# \u2500\u2500 PROCESSES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nps aux --sort=-%cpu | head -20         # Top CPU consumers\nps aux | grep -E 'nc |ncat|netcat|socat' # Reverse shell indicators\npstree -p                              # Process tree with PIDs\n\n# \u2500\u2500 LOG ANALYSIS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n# Top failed SSH IPs\ngrep 'Failed password' /var/log/auth.log | \\\n    awk '{print $11}' | sort | uniq -c | sort -rn | head\n\n# Successful logins\ngrep 'Accepted password\\|Accepted publickey' /var/log/auth.log | \\\n    awk '{print $1,$2,$3,$9,$11}'\n\n# Recent cron activity\ngrep CRON /var/log/syslog | tail -50\n\n# \u2500\u2500 PERSISTENCE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nfind / -perm /4000 -type f 2>/dev/null     # SUID files\nfind / -mtime -1 -type f 2>/dev/null | head # Modified in last 24h\nfor u in $(cut -d: -f1 /etc/passwd); do\n    crontab -l -u $u 2>/dev/null\ndone\n\n# \u2500\u2500 USERS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nwho && w                               # Currently logged in\nlast | head -20                        # Login history\nlastlog                                # Last login per user\ngrep -v '/nologin\\|/false' /etc/passwd # Users with shell access", "t": ["bash", "IR", "security", "one-liners", "threat hunting"]}]}, "Python \u2013 Basics": {"icon": "\ud83d\udc0d", "color": "#f39c12", "lang": "python", "items": [{"c": "Variables & Data Types", "d": "Python is dynamically typed. type() returns type. isinstance() checks type. bool, None, empty string/list/dict are falsy.", "code": "# Primitives\nname   = 'Chris'     # str\nage    = 30          # int\nscore  = 3.14        # float\nactive = True        # bool\nnothing = None       # NoneType\n\n# Type checking\ntype(name)                      # <class 'str'>\nisinstance(age, int)            # True\nisinstance(active, (bool,int))  # True \u2014 bool is int subclass\n\n# Type conversion\nint('42')                       # 42\nfloat('3.14')                  # 3.14\nstr(42)                        # '42'\nbool(0)                        # False (0,None,'',[],'{}' are falsy)\nbool('hello')                  # True\n\n# Strings\nf\"Name: {name}, Age: {age}\"    # f-string (preferred)\n'Hello ' + name                # Concatenation\nname.upper()                   # CHRIS\nname.lower()                   # chris\nname.replace('C','K')         # Kris\nname.split()                   # ['Chris']\n', '.join(['a','b','c'])       # 'a, b, c'\nname.strip()                   # Remove whitespace\nlen(name)                      # 5\nname[0]                        # 'C'\nname[-1]                       # 's' (last char)\nname[1:3]                      # 'hr' (slice)", "t": ["python", "basics", "types"]}, {"c": "Lists & Dicts", "d": "Lists are ordered, mutable sequences. Dicts are key-value mappings. Comprehensions are idiomatic Python.", "code": "# Lists\nitems = [1, 2, 3, 'four', True]\nitems.append('five')           # Add to end\nitems.extend([6, 7])           # Add multiple\nitems.insert(0, 'zero')        # Insert at index\nitems.pop()                    # Remove and return last\nitems.pop(0)                   # Remove and return index 0\nitems.remove('four')           # Remove by value (first match)\nsorted(items)                  # Sorted copy\n3 in items                     # Membership: True\n\n# List comprehension (idiomatic)\nsquares = [x**2 for x in range(10)]\nevens   = [x for x in range(20) if x % 2 == 0]\n\n# Dicts\nuser = {'name':'Chris','role':'admin','active':True}\nuser['name']                   # Get value\nuser.get('missing','N/A')     # Get with default\nuser['email'] = 'c@ex.com'   # Add/update\ndel user['active']             # Delete key\n'name' in user                 # Key exists: True\nuser.keys()                    # All keys\nuser.values()                  # All values\nuser.items()                   # Key-value pairs\n\n# Dict comprehension\nupper = {k:v.upper() for k,v in user.items()\n         if isinstance(v,str)}", "t": ["python", "lists", "dicts", "comprehensions"]}]}, "Python \u2013 Control Flow & Functions": {"icon": "\ud83d\udc0d", "color": "#f39c12", "lang": "python", "items": [{"c": "Control Flow", "d": "Python uses indentation (4 spaces) for blocks. in operator for membership. Ternary is value_if_true if condition else value_if_false.", "code": "# If/elif/else\nscore = 85\nif score >= 90:\n    grade = 'A'\nelif score >= 80:\n    grade = 'B'\nelse:\n    grade = 'F'\n\n# Ternary expression\nresult = 'pass' if score >= 70 else 'fail'\n\n# For loops\nfor item in ['a','b','c']:\n    print(item)\n\nfor i, item in enumerate(['a','b','c']):\n    print(f'{i}: {item}')         # 0: a, 1: b, 2: c\n\nfor key, value in user.items():\n    print(f'{key} = {value}')\n\nfor x, y in zip([1,2,3],['a','b','c']):\n    print(x, y)                   # 1 a, 2 b, 3 c\n\n# Range\nfor i in range(10):     # 0-9\nfor i in range(1,11):   # 1-10\nfor i in range(0,10,2): # 0,2,4,6,8\n\n# While\ncount = 0\nwhile count < 10:\n    count += 1\n\n# Loop control\nfor x in range(100):\n    if x % 2 == 0: continue   # Skip even\n    if x > 20: break          # Stop\n\n# Match/case (Python 3.10+)\nmatch command:\n    case 'start': start_service()\n    case 'stop':  stop_service()\n    case _:       print('Unknown')", "t": ["python", "control flow", "loops"]}, {"c": "Functions", "d": "def creates functions. Type hints (3.5+) document expected types. *args collects positional args. **kwargs collects keyword args.", "code": "# Basic function\ndef greet(name, greeting='Hello'):\n    \"\"\"Return a greeting string.\"\"\"\n    return f'{greeting}, {name}!'\n\ngreet('Chris')              # Hello, Chris!\ngreet('Chris','Hey')       # Hey, Chris!\n\n# Type hints\ndef process_user(name: str, age: int,\n                 active: bool = True) -> dict:\n    return {'name':name,'age':age,'active':active}\n\n# *args and **kwargs\ndef flexible(*args, **kwargs):\n    for arg in args:\n        print(arg)                 # Positional args as tuple\n    for k,v in kwargs.items():\n        print(f'{k}: {v}')        # Keyword args as dict\n\nflexible(1,2,3,name='Chris',role='admin')\n\n# Keyword-only args (after *)\ndef secure_func(data, *, key, algo='AES'):\n    pass  # key and algo MUST be keyword args\n\n# Lambda\nsquare = lambda x: x ** 2\nsorted_users = sorted(users, key=lambda u: u['name'])\n\n# Decorator\ndef log_call(func):\n    def wrapper(*args, **kwargs):\n        print(f'Calling {func.__name__}')\n        return func(*args, **kwargs)\n    return wrapper\n\n@log_call\ndef my_function(): pass", "t": ["python", "functions", "parameters", "decorators"]}, {"c": "Error Handling", "d": "try/except/else/finally. raise to throw exceptions. Create custom exceptions by inheriting from Exception.", "code": "# Basic try/except/finally\ntry:\n    result = 10 / 0\nexcept ZeroDivisionError:\n    print('Cannot divide by zero')\nexcept (TypeError, ValueError) as e:\n    print(f'Type or value error: {e}')\nexcept Exception as e:\n    print(f'Unexpected: {type(e).__name__}: {e}')\nelse:\n    print('No exception occurred')  # Only if no exception\nfinally:\n    print('Always runs')            # Cleanup\n\n# Common exceptions\n# FileNotFoundError  PermissionError  KeyError\n# IndexError  TypeError  ValueError\n# ConnectionError  TimeoutError  ImportError\n\n# Raise exceptions\nraise ValueError('Age must be positive')\nraise FileNotFoundError(f'Config not found: {path}')\n\n# Custom exceptions\nclass HIPAAError(Exception):\n    pass\n\nclass UnauthorizedPHIAccess(HIPAAError):\n    def __init__(self, user, record):\n        super().__init__(\n            f'{user} accessed {record} without authorization'\n        )\n\n# Context manager (with = auto-cleanup)\nwith open('file.txt') as f:  # File closed automatically\n    data = f.read()", "t": ["python", "error handling", "exceptions"]}]}, "Python \u2013 File & Data": {"icon": "\ud83d\udc0d", "color": "#f39c12", "lang": "python", "items": [{"c": "File I/O & Pathlib", "d": "Always use with statement for automatic cleanup. Pathlib is the modern cross-platform approach to file system operations.", "code": "# Read text file\nwith open('file.txt','r',encoding='utf-8') as f:\n    content = f.read()          # Entire file as string\n\nwith open('file.txt','r') as f:\n    for line in f:              # Memory-efficient line iteration\n        print(line.strip())\n\n# Write file\nwith open('output.txt','w') as f:\n    f.write('Hello\\n')\n    f.writelines(['line1\\n','line2\\n'])\n\n# Append\nwith open('log.txt','a') as f:\n    f.write(f'{datetime.now()}: Event\\n')\n\n# Binary (forensics, images, executables)\nwith open('file.exe','rb') as f:\n    data   = f.read()\n    header = data[:4]  # Magic bytes\n\n# Pathlib (modern, cross-platform)\nfrom pathlib import Path\n\np = Path('/var/log/auth.log')\np.exists()                   # True/False\np.parent                     # Path('/var/log')\np.name                       # 'auth.log'\np.suffix                     # '.log'\np.stat().st_size             # File size in bytes\np.read_text()                # Read entire file\np.write_text('content')     # Write file\n\n# Find files\nlist(Path('.').glob('*.py'))           # .py in current dir\nlist(Path('/var/log').rglob('*.log')) # All .log recursively\n\n# Walk directory tree\nfor root, dirs, files in os.walk('/var/log'):\n    for file in files:\n        print(os.path.join(root, file))", "t": ["python", "files", "IO", "pathlib"]}, {"c": "JSON & CSV", "d": "json module for APIs and config. csv module for tabular data. Both integrate naturally with Python dicts and lists.", "code": "import json, csv\n\n# JSON \u2014 read from file\nwith open('config.json') as f:\n    config = json.load(f)\nprint(config['server']['host'])\n\n# JSON \u2014 write to file\ndata = {'name':'Chris','roles':['read','write']}\nwith open('output.json','w') as f:\n    json.dump(data, f, indent=2, default=str)  # default=str handles datetime\n\n# JSON \u2014 strings\njson_str = json.dumps(data, indent=2)  # Dict \u2192 JSON string\nobj       = json.loads(json_str)       # JSON string \u2192 dict\n\n# CSV \u2014 read\nwith open('users.csv',newline='') as f:\n    reader = csv.DictReader(f)         # First row = headers\n    for row in reader:\n        print(row['name'], row['email'])\n\n# CSV \u2014 write\nfields = ['name','email','role']\nwith open('output.csv','w',newline='') as f:\n    writer = csv.DictWriter(f, fieldnames=fields)\n    writer.writeheader()\n    writer.writerow({'name':'Chris','email':'c@ex.com','role':'admin'})\n    writer.writerows(list_of_dicts)    # Multiple rows\n\n# Read all into list\nwith open('data.csv') as f:\n    data = list(csv.DictReader(f))", "t": ["python", "JSON", "CSV", "data"]}]}, "Python \u2013 Security": {"icon": "\ud83d\udc0d", "color": "#f39c12", "lang": "python", "items": [{"c": "Hashing & Cryptography", "d": "hashlib for hashing. secrets for cryptographically secure randomness. hmac.compare_digest for timing-safe comparison.", "code": "import hashlib, hmac, secrets\n\n# Hash a string\nhash_str = hashlib.sha256('password'.encode()).hexdigest()\nhash_md5 = hashlib.md5('text'.encode()).hexdigest()\n\n# Hash a file (chunked \u2014 handles large files)\ndef hash_file(filepath: str, algo: str = 'sha256') -> str:\n    h = hashlib.new(algo)\n    with open(filepath,'rb') as f:\n        for chunk in iter(lambda: f.read(65536), b''):\n            h.update(chunk)\n    return h.hexdigest()\n\nprint(f'SHA256: {hash_file(\"/path/to/file.exe\")}')\n\n# Timing-safe comparison (prevents timing attacks)\ndef verify_file(filepath, expected_hash, algo='sha256'):\n    actual = hash_file(filepath, algo)\n    return hmac.compare_digest(actual, expected_hash)\n\n# Cryptographically secure random (NOT random module)\ntoken   = secrets.token_hex(32)         # 64-char hex token\napi_key = secrets.token_urlsafe(32)     # URL-safe base64\npin     = secrets.randbelow(10000)      # Random int 0-9999\n\n# Password hashing (pbkdf2 \u2014 NOT plain SHA256)\nimport os\nsalt    = os.urandom(16)\npw_hash = hashlib.pbkdf2_hmac(\n    'sha256', 'password'.encode(), salt, 100000\n)\n# Store both salt and pw_hash", "t": ["python", "hashing", "cryptography", "security"]}, {"c": "Subprocess & OS", "d": "subprocess for running system commands. os and sys for system interaction. Avoid shell=True with untrusted input (shell injection risk).", "code": "import subprocess, os, sys\nfrom pathlib import Path\n\n# Run command (preferred \u2014 list args, no injection risk)\nresult = subprocess.run(\n    ['nmap','-sV','-p','80,443,22','192.168.1.1'],\n    capture_output=True,\n    text=True,\n    timeout=30\n)\nprint(result.stdout)\nprint(result.returncode)   # 0 = success\n\n# Check return code\nresult = subprocess.run(['systemctl','status','sshd'],\n                        capture_output=True)\nif result.returncode != 0:\n    print('SSH not running')\n\n# shell=True \u2014 only use with trusted fixed strings\nresult = subprocess.run('ps aux | grep sshd',\n                        shell=True, capture_output=True, text=True)\n\n# Capture output as string\noutput = subprocess.check_output(['hostname'], text=True).strip()\n\n# Environment & file system\npath = os.environ.get('PATH')\nhome = os.path.expanduser('~')\nos.getcwd()\nos.makedirs('dir/sub', exist_ok=True)\nos.path.exists('/etc/passwd')\nos.path.getsize('/var/log/syslog')", "t": ["python", "subprocess", "OS", "system"]}, {"c": "Regex", "d": "re module. Compile patterns for repeated use. Named groups make extraction readable. findall, search, sub, split.", "code": "import re\n\n# Compile pattern (use for repeated matches)\nipv4    = re.compile(r'\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b')\nemail   = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}')\nhash_md5 = re.compile(r'\\b[a-fA-F0-9]{32}\\b')\n\n# Search (find first match)\nmatch = re.search(r'(\\d{1,3}\\.){3}\\d{1,3}',\n                  'IP: 192.168.1.100 connected')\nif match:\n    print(match.group())     # 192.168.1.100\n\n# Find all\nips = re.findall(r'(?:\\d{1,3}\\.){3}\\d{1,3}', log_content)\nprint(f'Found {len(ips)} IPs: {set(ips)}')\n\n# Substitute\nclean  = re.sub(r'password=\\S+', 'password=REDACTED', config)\nnormal = re.sub(r'\\s+', ' ', messy_string)\n\n# Named groups (clean extraction)\nlog_re = re.compile(\n    r'Failed password for (?P<user>\\S+)'\n    r' from (?P<ip>[\\d.]+)'\n)\nfor line in log_lines:\n    m = log_re.search(line)\n    if m:\n        print(f\"User: {m.group('user')}, IP: {m.group('ip')}\")\n\n# Split\nparts = re.split(r'[,;\\s]+', 'one,two;three four')\n# ['one', 'two', 'three', 'four']", "t": ["python", "regex", "text processing", "parsing"]}, {"c": "HTTP Requests & APIs", "d": "requests library (pip install requests). Always handle exceptions, set timeouts, and use raise_for_status() to catch HTTP errors.", "code": "import requests\nfrom requests.exceptions import RequestException\n\n# GET request\ntry:\n    resp = requests.get(\n        'https://api.example.com/users',\n        headers={'Authorization': f'Bearer {api_token}'},\n        params={'page':1,'limit':100},\n        timeout=10\n    )\n    resp.raise_for_status()        # Raise on 4xx/5xx\n    data = resp.json()             # Parse JSON response\n    print(f'Status: {resp.status_code}')\n\nexcept requests.exceptions.HTTPError as e:\n    print(f'HTTP error: {e.response.status_code}')\nexcept requests.exceptions.ConnectionError:\n    print('Connection failed')\nexcept requests.exceptions.Timeout:\n    print('Request timed out')\nexcept RequestException as e:\n    print(f'Request failed: {e}')\n\n# POST request\npayload = {'username':'chris','action':'login'}\nresp = requests.post('https://api.example.com/auth',\n                     json=payload,              # Auto sets Content-Type\n                     headers={'X-API-Key':api_key},\n                     timeout=10)\n\n# Session (reuse connection, persist cookies/headers)\nsession = requests.Session()\nsession.headers.update({'Authorization':f'Bearer {token}'})\nfor endpoint in endpoints:\n    resp = session.get(f'https://api.example.com/{endpoint}')\n    results[endpoint] = resp.json()\n\n# Download file\nresp = requests.get(url, stream=True)\nwith open('download.zip','wb') as f:\n    for chunk in resp.iter_content(chunk_size=8192):\n        f.write(chunk)", "t": ["python", "HTTP", "REST API", "requests"]}]}};
+const TABLE_SECTIONS={"Side-by-Side Reference": {"icon": "\u2194\ufe0f", "color": "#9b59b6", "cols": ["Task", "PowerShell", "Bash", "Python"], "rows": [["Print output", "Write-Output 'text'", "echo 'text'", "print('text')"], ["Variable assignment", "$var = 'value'", "var='value'", "var = 'value'"], ["String interpolation", "\"Hello $name\"", "\"Hello $name\"", "f'Hello {name}'"], ["String length", "$str.Length", "${#str}", "len(str)"], ["Array/list creation", "$arr = @(1,2,3)", "arr=(1 2 3)", "arr = [1,2,3]"], ["Array length", "$arr.Count", "${#arr[@]}", "len(arr)"], ["Loop over list", "foreach ($i in $arr) {}", "for i in \"${arr[@]}\"; do", "for i in arr:"], ["For range", "1..10 | ForEach-Object {}", "for ((i=1;i<=10;i++)); do", "for i in range(1,11):"], ["If condition", "if ($x -gt 10) {}", "if [ $x -gt 10 ]; then", "if x > 10:"], ["Define function", "function Name { param() }", "name() { local arg=$1; }", "def name(arg):"], ["Return value", "return $value", "echo $value (capture with $())", "return value"], ["Read file", "Get-Content 'file.txt'", "cat file.txt", "open('file.txt').read()"], ["Write file", "Set-Content 'file.txt' $data", "echo $data > file.txt", "open('f','w').write(data)"], ["Append file", "Add-Content 'file.txt' $data", "echo $data >> file.txt", "open('f','a').write(data)"], ["Check file exists", "Test-Path 'file.txt'", "[ -f 'file.txt' ]", "Path('file.txt').exists()"], ["Run system command", "Invoke-Expression $cmd", "eval \"$cmd\"", "subprocess.run(cmd)"], ["Get current dir", "Get-Location", "pwd", "os.getcwd()"], ["List directory", "Get-ChildItem", "ls", "os.listdir()"], ["Error handling", "try {} catch {}", "set -e; trap ERR", "try: ... except:"], ["Import module", "Import-Module name", "source ./file.sh", "import module_name"], ["Regular expression", "'text' -match 'pattern'", "[[ $str =~ pattern ]]", "re.search(pattern,str)"], ["Hash a file", "Get-FileHash file.exe", "sha256sum file.exe", "hashlib.sha256(data).hexdigest()"], ["JSON parse", "$json | ConvertFrom-Json", "jq '.' file.json", "json.loads(json_str)"], ["JSON create", "$obj | ConvertTo-Json", "jq -n '{key:\"val\"}'", "json.dumps(obj)"], ["HTTP GET", "Invoke-RestMethod 'url'", "curl -s 'url'", "requests.get('url').json()"], ["Exit with code", "exit 1", "exit 1", "sys.exit(1)"]]}};
+let currentView='home',currentSection=null;
+let themeMode=localStorage.getItem('kb_theme_Scripting_Fundamentals_KB')||'dark';
+document.documentElement.setAttribute('data-theme',themeMode);
+document.getElementById('btn-theme').textContent=themeMode==='dark'?'☀️ Light':'🌙 Dark';
+
+
+let currentLangFilter='all';
+function setLangFilter(lang){
+  currentLangFilter=lang;
+  document.querySelectorAll('[id^="lf-"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('lf-'+lang).classList.add('active');
+  if(currentView==='home') buildHome();
+  else if(currentSection&&SECTIONS[currentSection]) showSection(currentSection);
+}
+function filterByLang(items){
+  if(currentLangFilter==='all') return items;
+  return items.filter(i=>!i.lang||i.lang===currentLangFilter);
+}
+
+
+function copyCode(btn){
+  const code=btn.closest('.code-wrap').querySelector('code').textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    const o=btn.textContent;btn.textContent='Copied!';btn.style.color='var(--accent2)';
+    setTimeout(()=>{btn.textContent=o;btn.style.color='';},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=code;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);btn.textContent='Copied!';
+    setTimeout(()=>btn.textContent='Copy',2000);
+  });
+}
+function loadCode(card){
+  const pre=card.querySelector('.code-block');
+  if(!pre||pre._loaded) return;
+  const concept=card.querySelector('.card-concept').textContent;
+  if(!currentSection) return;
+  const sec=SECTIONS[currentSection];
+  if(!sec) return;
+  const item=sec.items.find(i=>i.c===concept);
+  if(item&&item.code){pre.textContent=item.code;pre._loaded=true;}
+}
+
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function hl(text,q){if(!q)return esc(text);return esc(text).replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');}
+
+function buildCard(item,section,color,showSec){
+  const tags=(item.t||[]).map(t=>`<span class="tag ${t==='critical'?'critical':''}">${esc(t)}</span>`).join('');
+  const secLbl=showSec?`<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:3px;">${esc(section)}</div>`:'';
+  const hasCo=item.code&&item.code.length>0;
+  const codeHtml=hasCo?`<div class="code-wrap"><div class="code-hdr"><span class="lang-badge ${item.lang||''}">${item.lang||'code'}</span><button class="copy-btn" onclick="event.stopPropagation();copyCode(this)">Copy</button></div><pre><code class="code-block"></code></pre></div>`:'';
+  return `<div class="card" style="--ca:${color}" onclick="toggleCard(this)">
+    ${secLbl}<div class="card-top"><div class="card-concept">${esc(item.c)}</div><span class="card-toggle">›</span></div>
+    <div class="card-preview">${esc(item.d)}</div>
+    <div class="card-def"><p style="margin-bottom:${hasCo?'8px':'0'}">${esc(item.d)}</p>${codeHtml}</div>
+    <div class="card-tags">${tags}</div></div>`;
+}
+
+function toggleCard(card){
+  card.classList.toggle('expanded');
+  if(card.classList.contains('expanded')) loadCode(card);
+}
+
+function buildNav(){
+  const nav=document.getElementById('nav');nav.innerHTML='';
+  const hG=document.createElement('div');hG.className='ng';
+  hG.innerHTML='<div class="ng-label">Navigation</div><div class="ni" id="ni-home" onclick="showHome()"><span class="ni-icon">🏠</span><span class="ni-name">Home</span></div>';
+  nav.appendChild(hG);
+  const sG=document.createElement('div');sG.className='ng';
+  sG.innerHTML=`<div class="ng-label">Sections (${Object.keys(SECTIONS).length})</div>`;
+  Object.entries(SECTIONS).forEach(([name,sec])=>{
+    const d=document.createElement('div');d.className='ni';d.id='ni-'+name;
+    d.onclick=()=>showSection(name);
+    d.innerHTML=`<span class="ni-icon">${sec.icon}</span><span class="ni-name">${esc(name)}</span><span class="ni-count">${sec.items.length}</span>`;
+    sG.appendChild(d);
+  });
+  nav.appendChild(sG);
+  if(Object.keys(TABLE_SECTIONS).length){
+    const tG=document.createElement('div');tG.className='ng';
+    tG.innerHTML='<div class="ng-label">Reference Tables</div>';
+    Object.entries(TABLE_SECTIONS).forEach(([name,sec])=>{
+      const d=document.createElement('div');d.className='ni';d.id='ni-'+name;
+      d.onclick=()=>showTableSection(name);
+      d.innerHTML=`<span class="ni-icon">${sec.icon}</span><span class="ni-name">${esc(name)}</span><span class="ni-count">${sec.rows.length}</span>`;
+      tG.appendChild(d);
+    });
+    nav.appendChild(tG);
+  }
+}
+
+function setActive(id){document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));const el=document.getElementById('ni-'+id);if(el)el.classList.add('active');}
+function setViews(v){
+  document.getElementById('home-view').style.display=v==='home'?'block':'none';
+  document.getElementById('section-view').style.display=v==='section'?'block':'none';
+  document.getElementById('search-results').style.display=v==='search'?'block':'none';
+}
+
+function buildHome(){
+  const grid=document.getElementById('home-grid');grid.innerHTML='';
+  [...Object.entries(SECTIONS),...Object.entries(TABLE_SECTIONS)].forEach(([name,sec])=>{
+    if(currentLangFilter!=='all'&&sec.lang&&sec.lang!==currentLangFilter) return;
+    const count=sec.items?filterByLang(sec.items).length:sec.rows.length;
+    if(count===0) return;
+    const parts=name.split(' – ');
+    const d=document.createElement('div');d.className='sc';
+    d.style.setProperty('--sc-color',sec.color);
+    d.innerHTML=`<div class="s-num">${sec.icon} ${parts[0]}</div><div class="s-name">${esc(parts[1]||name)}</div><div class="s-count">${count} ${sec.items?'concepts':'entries'}</div>`;
+    d.onclick=()=>sec.items?showSection(name):showTableSection(name);
+    grid.appendChild(d);
+  });
+}
+
+function showHome(){
+  setViews('home');setActive('home');
+  document.getElementById('bc-cur').textContent='Home';
+  document.getElementById('search').value='';
+  currentView='home';currentSection=null;buildHome();
+}
+
+function showSection(name){
+  const sec=SECTIONS[name];if(!sec) return;
+  currentSection=name;currentView='section';
+  setViews('section');setActive(name);
+  document.getElementById('bc-cur').textContent=name;
+  document.getElementById('search').value='';
+  const parts=name.split(' – ');
+  document.getElementById('sec-hero').innerHTML=
+    `<div class="sn" style="color:${sec.color}">${sec.icon} ${esc(name)}</div>
+     <h2>${esc(parts[1]||name)}</h2>
+     <div class="sm">${sec.items.length} concepts · Click to expand</div>`;
+  document.getElementById('sec-ctrl').innerHTML=
+    '<button class="sec-btn" onclick="expandAll()">Expand All</button><button class="sec-btn" onclick="collapseAll()">Collapse All</button>';
+  const grid=document.getElementById('cards-grid');
+  grid.style.display='';
+  grid.innerHTML=filterByLang(sec.items).map(item=>buildCard(item,name,sec.color,false)).join('');
+  window.scrollTo(0,0);
+}
+
+function showTableSection(name){
+  const sec=TABLE_SECTIONS[name];if(!sec) return;
+  currentSection=name;currentView='table';
+  setViews('section');setActive(name);
+  document.getElementById('bc-cur').textContent=name;
+  document.getElementById('search').value='';
+  const parts=name.split(' – ');
+  document.getElementById('sec-hero').innerHTML=
+    `<div class="sn" style="color:${sec.color}">${sec.icon} ${esc(name)}</div>
+     <h2>${esc(parts[1]||name)}</h2>
+     <div class="sm">${sec.rows.length} entries</div>`;
+  document.getElementById('sec-ctrl').innerHTML='';
+  const grid=document.getElementById('cards-grid');grid.style.display='block';
+  const tid='t_'+name.replace(/\W/g,'_');
+  grid.innerHTML=`<input class="tbl-search" id="${tid}-s" placeholder="Filter table..." oninput="filterTbl('${tid}','${name}')" autocomplete="off">
+    <div class="tbl-wrap"><table class="ref-table" id="${tid}">
+    <thead><tr>${sec.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead>
+    <tbody id="${tid}-b">${renderRows(sec.rows)}</tbody></table></div>`;
+  window.scrollTo(0,0);
+}
+
+function renderRows(rows){return rows.map(row=>`<tr>${row.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('');}
+function filterTbl(tid,name){
+  const q=document.getElementById(tid+'-s').value.toLowerCase();
+  const sec=TABLE_SECTIONS[name];if(!sec) return;
+  const rows=q?sec.rows.filter(r=>r.some(c=>c.toLowerCase().includes(q))):sec.rows;
+  document.getElementById(tid+'-b').innerHTML=renderRows(rows);
+}
+
+function expandAll(){document.querySelectorAll('#cards-grid .card').forEach(c=>{c.classList.add('expanded');loadCode(c);});}
+function collapseAll(){document.querySelectorAll('#cards-grid .card').forEach(c=>c.classList.remove('expanded'));}
+
+document.getElementById('search').addEventListener('input',function(e){
+  const q=e.target.value.trim();
+  if(!q){showHome();return;}
+  doSearch(q);
+});
+
+function doSearch(q){
+  const ql=q.toLowerCase();let res={},total=0;
+  Object.entries(SECTIONS).forEach(([name,sec])=>{
+    sec.items.forEach(item=>{
+      if(item.c.toLowerCase().includes(ql)||item.d.toLowerCase().includes(ql)||(item.t||[]).some(t=>t.toLowerCase().includes(ql))){
+        if(!res[name]) res[name]={color:sec.color,icon:sec.icon,items:[]};
+        res[name].items.push(item);total++;
+      }
+    });
+  });
+  Object.entries(TABLE_SECTIONS).forEach(([name,sec])=>{
+    sec.rows.forEach(row=>{
+      if(row.some(c=>c.toLowerCase().includes(ql))){
+        if(!res[name]) res[name]={color:sec.color,icon:sec.icon,rows:[],cols:sec.cols};
+        (res[name].rows=res[name].rows||[]).push(row);total++;
+      }
+    });
+  });
+  setViews('search');document.getElementById('bc-cur').textContent=`"${q}"`;currentView='search';
+  const sr=document.getElementById('search-results');
+  if(!total){sr.innerHTML=`<div style="text-align:center;padding:60px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;"><div style="font-size:36px;margin-bottom:10px;">🔍</div><p>No results for "${esc(q)}"</p></div>`;return;}
+  let html=`<div class="sr-hdr"><span>${total}</span> result${total!==1?'s':''} for "<strong>${esc(q)}</strong>"</div>`;
+  Object.entries(res).forEach(([name,r])=>{
+    html+=`<div class="sr-sl" style="color:${r.color}">${r.icon||''} ${esc(name)}</div>`;
+    if(r.items){
+      html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;margin-bottom:14px;">`;
+      r.items.forEach(item=>{
+        const tags=(item.t||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+        html+=`<div class="card" style="--ca:${r.color}" onclick="this.classList.toggle('expanded')">
+          <div class="card-top"><div class="card-concept">${hl(item.c,q)}</div><span class="card-toggle">›</span></div>
+          <div class="card-preview">${hl(item.d,q)}</div>
+          <div class="card-def"><p>${hl(item.d,q)}</p></div>
+          <div class="card-tags">${tags}</div></div>`;
+      });
+      html+='</div>';
+    } else if(r.rows){
+      html+=`<div class="tbl-wrap" style="margin-bottom:14px;"><table class="ref-table"><thead><tr>${r.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+      r.rows.forEach(row=>{html+=`<tr>${row.map(c=>`<td>${hl(c,q)}</td>`).join('')}</tr>`;}); 
+      html+=`</tbody></table></div>`;
+    }
+  });
+  sr.innerHTML=html;window.scrollTo(0,0);
+}
+
+let quizItems=[],quizIdx=0;
+function buildQuiz(){quizItems=[];Object.entries(SECTIONS).forEach(([name,sec])=>{filterByLang(sec.items).forEach(item=>quizItems.push({...item,section:name,color:sec.color}));});quizItems=quizItems.sort(()=>Math.random()-.5);}
+function startQuiz(){buildQuiz();quizIdx=0;document.getElementById('qm').style.display='flex';showQuizCard();}
+function showQuizCard(){if(!quizItems.length)return;if(quizIdx>=quizItems.length)quizIdx=0;const item=quizItems[quizIdx];document.getElementById('q-sec').textContent=item.section;document.getElementById('q-sec').style.color=item.color;document.getElementById('q-con').textContent=item.c;document.getElementById('q-tags').innerHTML=(item.t||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('');const r=document.getElementById('q-rev');r.style.borderStyle='dashed';r.style.color='var(--muted)';r.textContent='Click to reveal definition';}
+function revealQuiz(){const item=quizItems[quizIdx];const r=document.getElementById('q-rev');r.style.borderStyle='solid';r.style.color='var(--text)';r.textContent=item.d;}
+function nextQuiz(){quizIdx=(quizIdx+1)%quizItems.length;showQuizCard();}
+function closeQuiz(){document.getElementById('qm').style.display='none';}
+
+function toggleTheme(){themeMode=themeMode==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',themeMode);document.getElementById('btn-theme').textContent=themeMode==='dark'?'☀️ Light':'🌙 Dark';localStorage.setItem('kb_theme_Scripting_Fundamentals_KB',themeMode);}
+
+document.addEventListener('keydown',e=>{
+  const inInput=document.activeElement&&document.activeElement.tagName==='INPUT';
+  if(e.key==='Escape'){if(document.getElementById('qm').style.display==='flex'){closeQuiz();return;}document.getElementById('search').value='';showHome();return;}
+  if(inInput) return;
+  if(e.key==='/'){e.preventDefault();document.getElementById('search').focus();}
+  if(e.key==='q'||e.key==='Q') startQuiz();
+  if(e.key==='t'||e.key==='T') toggleTheme();
+});
+document.getElementById('qm').addEventListener('click',e=>{if(e.target===e.currentTarget)closeQuiz();});
+buildNav();buildHome();
+</script>
+</body>
+</html>

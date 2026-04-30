@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberSec Knowledge Base — Chris Kain</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2330;--surface3:#21262d;
+  --border:#30363d;--accent:#58a6ff;--accent2:#3fb950;--accent3:#f78166;
+  --accent4:#d2a8ff;--accent5:#ffa657;--accent6:#79c0ff;
+  --text:#e6edf3;--muted:#7d8590;--tag-bg:#1f2937;--tag-text:#93c5fd;
+  --hl:#1a3a5c;--shadow:0 8px 32px rgba(0,0,0,.4);
+  --radius:10px;--transition:0.18s ease;
+}
+[data-theme="light"] {
+  --bg:#f6f8fa;--surface:#ffffff;--surface2:#f0f2f5;--surface3:#e8eaed;
+  --border:#d0d7de;--accent:#0969da;--accent2:#1a7f37;--accent3:#cf222e;
+  --accent4:#8250df;--accent5:#bc4c00;--accent6:#0550ae;
+  --text:#1f2328;--muted:#656d76;--tag-bg:#ddf4ff;--tag-text:#0969da;
+  --hl:#ddf4ff;--shadow:0 4px 16px rgba(0,0,0,.1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* ── SIDEBAR ── */
+#sidebar{width:256px;min-width:256px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;transition:background var(--transition);}
+#sb-head{padding:16px 14px 12px;border-bottom:1px solid var(--border);}
+#sb-head .logo{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+#sb-head h1{font-size:15px;font-weight:800;line-height:1.2;}
+#sb-head .by{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+#search-wrap{padding:10px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10;}
+#search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px 6px 28px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color var(--transition);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:8px center;}
+#search:focus{border-color:var(--accent);}
+#search::placeholder{color:var(--muted);}
+#nav{flex:1;overflow-y:auto;padding:4px 0 20px;}
+.nav-group{border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:2px;}
+.nav-group-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:10px 14px 4px;}
+.nav-item{display:flex;align-items:center;gap:7px;padding:5px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all var(--transition);border-left:2px solid transparent;user-select:none;}
+.nav-item:hover{color:var(--text);background:var(--surface2);}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--hl);}
+.nav-item .ni-icon{font-size:13px;flex-shrink:0;}
+.nav-item .ni-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nav-item .ni-count{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--surface3);padding:1px 5px;border-radius:8px;flex-shrink:0;}
+
+/* ── MAIN ── */
+#main{margin-left:256px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+#topbar{position:sticky;top:0;background:rgba(13,17,23,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:12px;height:52px;z-index:50;transition:background var(--transition);}
+[data-theme="light"] #topbar{background:rgba(246,248,250,.94);}
+#breadcrumb{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex:1;overflow:hidden;}
+#breadcrumb .sep{color:var(--border);}
+#breadcrumb .cur{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);cursor:pointer;transition:all var(--transition);white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.tb-btn:hover{border-color:var(--accent);color:var(--accent);}
+.tb-btn.active{background:var(--hl);border-color:var(--accent);color:var(--accent);}
+#content{padding:28px 28px;flex:1;}
+
+/* ── HOME ── */
+#home-view{animation:fadeUp .3s ease;}
+.home-hero{margin-bottom:32px;}
+.home-hero .greeting{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:8px;}
+.home-hero h2{font-size:32px;font-weight:800;line-height:1.15;margin-bottom:10px;}
+.home-hero h2 .hl{color:var(--accent);}
+.home-hero p{font-size:13px;color:var(--muted);max-width:560px;line-height:1.7;}
+.tip-bar{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:6px;padding:11px 14px;font-size:12px;color:var(--muted);margin-bottom:28px;font-family:'JetBrains Mono',monospace;line-height:1.6;}
+.tip-bar strong{color:var(--accent2);}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:all var(--transition);position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--sc-color,var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .25s;}
+.sc:hover{border-color:var(--sc-color,var(--accent));transform:translateY(-2px);box-shadow:var(--shadow);}
+.sc:hover::after{transform:scaleX(1);}
+.sc .s-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sc-color,var(--accent));margin-bottom:5px;}
+.sc .s-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+.sc .s-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* ── SECTION VIEW ── */
+#section-view{display:none;animation:fadeUp .25s ease;}
+.sec-hero{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.sec-hero .sec-num{font-family:'JetBrains Mono',monospace;font-size:11px;margin-bottom:5px;}
+.sec-hero h2{font-size:26px;font-weight:800;margin-bottom:6px;}
+.sec-hero .sec-meta{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:14px;}
+.sec-controls{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+.sec-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);cursor:pointer;transition:all var(--transition);}
+.sec-btn:hover{border-color:var(--accent);color:var(--accent);}
+#cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all var(--transition);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ca,var(--accent));opacity:0;transition:opacity var(--transition);}
+.card:hover{border-color:var(--ca,var(--accent));transform:translateY(-1px);box-shadow:var(--shadow);}
+.card:hover::before,.card.expanded::before{opacity:1;}
+.card.expanded{border-color:var(--ca,var(--accent));background:var(--surface2);}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.card-concept{font-size:14px;font-weight:700;color:var(--text);flex:1;}
+.card-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.card-bm{font-size:14px;color:var(--muted);cursor:pointer;transition:color var(--transition);line-height:1;}
+.card-bm:hover,.card-bm.starred{color:var(--accent5);}
+.card-bm.starred::after{content:'★';}
+.card-bm:not(.starred)::after{content:'☆';}
+.card-toggle{font-size:15px;color:var(--muted);transition:transform var(--transition),color var(--transition);}
+.card.expanded .card-toggle{transform:rotate(90deg);color:var(--ca,var(--accent));}
+.card-preview{font-size:12px;color:var(--muted);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card.expanded .card-preview{display:none;}
+.card-def{display:none;font-size:13px;color:var(--text);line-height:1.7;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.card.expanded .card-def{display:block;}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;}
+.tag{background:var(--tag-bg);color:var(--tag-text);font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid rgba(88,166,255,.15);}
+.tag.real-world{background:rgba(63,185,80,.12);color:var(--accent2);border-color:rgba(63,185,80,.25);}
+.tag.critical{background:rgba(247,129,102,.12);color:var(--accent3);border-color:rgba(247,129,102,.25);}
+
+/* ── TABLE SECTIONS ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+.ref-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ref-table thead th{background:var(--surface2);padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+.ref-table tbody tr{border-bottom:1px solid var(--border);transition:background var(--transition);}
+.ref-table tbody tr:last-child{border-bottom:none;}
+.ref-table tbody tr:hover{background:var(--surface2);}
+.ref-table td{padding:9px 14px;vertical-align:top;line-height:1.5;}
+.ref-table td:first-child{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent);white-space:nowrap;}
+.crit-high{color:var(--accent3)!important;}
+.crit-med{color:var(--accent5)!important;}
+.crit-low{color:var(--accent2)!important;}
+.tbl-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px 7px 28px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;margin-bottom:14px;transition:border-color var(--transition);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:8px center;}
+.tbl-search:focus{border-color:var(--accent);}
+.tbl-search::placeholder{color:var(--muted);}
+
+/* ── QUIZ ── */
+#quiz-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+#quiz-modal.open{display:flex;}
+#quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:560px;width:90%;text-align:center;position:relative;box-shadow:var(--shadow);}
+#quiz-section{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:10px;}
+#quiz-concept{font-size:22px;font-weight:800;margin-bottom:18px;color:var(--text);}
+#quiz-reveal{background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;color:var(--muted);margin-bottom:20px;cursor:pointer;transition:all var(--transition);}
+#quiz-reveal.shown{color:var(--text);border-style:solid;border-color:var(--accent2);}
+#quiz-reveal:not(.shown)::after{content:'Click to reveal definition';}
+#quiz-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.qbtn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 18px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text);cursor:pointer;transition:all var(--transition);}
+.qbtn:hover{border-color:var(--accent);color:var(--accent);}
+.qbtn.close{color:var(--muted);}
+#quiz-close-x{position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;transition:color var(--transition);}
+#quiz-close-x:hover{color:var(--text);}
+#quiz-tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:16px;}
+
+/* ── SHORTCUTS MODAL ── */
+#shortcuts-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+#shortcuts-modal.open{display:flex;}
+#shortcuts-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:400px;width:90%;}
+#shortcuts-card h3{font-size:16px;font-weight:700;margin-bottom:18px;color:var(--accent);}
+.shortcut-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.shortcut-row:last-child{border-bottom:none;}
+kbd{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+/* ── SEARCH RESULTS ── */
+#search-results{display:none;animation:fadeUp .25s ease;}
+.sr-header{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:18px;}
+.sr-header span{color:var(--accent);}
+.sr-section-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:14px 0 6px;border-bottom:1px solid var(--border);margin-bottom:10px;}
+
+/* ── BOOKMARKS ── */
+#bookmarks-view{display:none;animation:fadeUp .25s ease;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-state .es-icon{font-size:36px;margin-bottom:12px;}
+.empty-state p{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;}
+
+mark{background:rgba(255,166,87,.2);color:var(--accent5);border-radius:2px;padding:0 1px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div id="sb-head">
+    <div class="logo">// CyberKB v2.0</div>
+    <h1>CyberSec Knowledge Base</h1>
+    <div class="by">Chris Kain</div>
+  </div>
+  <div id="search-wrap">
+    <input type="text" id="search" placeholder="Search… (press / to focus)" autocomplete="off" spellcheck="false">
+  </div>
+  <nav id="nav"></nav>
+</aside>
+
+<main id="main">
+  <div id="topbar">
+    <div id="breadcrumb"><span>CyberKB</span><span class="sep">/</span><span class="cur" id="bc-cur">Home</span></div>
+    <button class="tb-btn" id="btn-rw" onclick="toggleRealWorld()" title="Show only real-world tagged items">🏥 Real-World</button>
+    <button class="tb-btn" id="btn-quiz" onclick="startQuiz()" title="Random concept quiz">🎲 Quiz Me</button>
+    <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">🌙 Dark</button>
+    <button class="tb-btn" onclick="showShortcuts()" title="Keyboard shortcuts (?)">⌨️</button>
+  </div>
+
+  <div id="content">
+    <div id="home-view">
+      <div class="home-hero">
+        <div class="greeting">// MY KNOWLEDGE BASE</div>
+        <h2>CyberSec Knowledge Base<br><span style="font-size:18px;font-weight:600;color:var(--muted)">By Chris Kain</span></h2>
+        <p style="margin-top:10px;">Browse by section or search for a specific topic.</p>
+      </div>
+      <div class="tip-bar"><strong>💡 How to use this:</strong> Browse when you need a quick definition. Or search for a specific topic.</div>
+      <div class="section-grid" id="home-grid"></div>
+    </div>
+
+    <div id="section-view">
+      <div class="sec-hero" id="sec-hero"></div>
+      <div class="sec-controls" id="sec-controls"></div>
+      <div id="cards-grid"></div>
+    </div>
+
+    <div id="search-results"></div>
+
+    <div id="bookmarks-view">
+      <div class="sec-hero">
+        <div class="sec-num" style="color:var(--accent5)">★ BOOKMARKS</div>
+        <h2 style="font-size:24px;font-weight:800;">Saved Concepts</h2>
+        <div class="sec-meta">Your starred cards — persists between sessions</div>
+      </div>
+      <div id="bm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;"></div>
+    </div>
+  </div>
+</main>
+
+<!-- QUIZ MODAL -->
+<div id="quiz-modal">
+  <div id="quiz-card">
+    <button id="quiz-close-x" onclick="closeQuiz()">×</button>
+    <div id="quiz-section"></div>
+    <div id="quiz-concept"></div>
+    <div id="quiz-tags"></div>
+    <div id="quiz-reveal" onclick="revealQuiz()"></div>
+    <div id="quiz-btns">
+      <button class="qbtn" onclick="nextQuiz()">Next →</button>
+      <button class="qbtn close" onclick="closeQuiz()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHORTCUTS MODAL -->
+<div id="shortcuts-modal">
+  <div id="shortcuts-card">
+    <h3>⌨️ Keyboard Shortcuts</h3>
+    <div class="shortcut-row"><span>Focus search</span><kbd>/</kbd></div>
+    <div class="shortcut-row"><span>Clear search / go home</span><kbd>Esc</kbd></div>
+    <div class="shortcut-row"><span>Show shortcuts</span><kbd>?</kbd></div>
+    <div class="shortcut-row"><span>Quiz mode</span><kbd>Q</kbd></div>
+    <div class="shortcut-row"><span>Next quiz card</span><kbd>Space</kbd></div>
+    <div class="shortcut-row"><span>Toggle theme</span><kbd>T</kbd></div>
+    <div class="shortcut-row"><span>Close modal</span><kbd>Esc</kbd></div>
+    <div style="margin-top:16px;text-align:center;"><button class="qbtn close" onclick="closeShortcuts()">Close</button></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════
+const SECTIONS = {
+  "02 – CIA Triad": {
+    icon:"🔐", color:"#58a6ff", type:"cards",
+    items:[
+      {c:"Confidentiality",d:"Information is accessible only to authorized people. Broken by unauthorized access, data leaks, or eavesdropping.",t:["encryption","access control","data classification"]},
+      {c:"Integrity",d:"Data is accurate and unaltered unless changed by authorized users. Broken by tampering or corruption.",t:["hashing","digital signatures","FIM"]},
+      {c:"Availability",d:"Systems and data are accessible when needed. Broken by DDoS, hardware failure, or ransomware.",t:["redundancy","backups","DDoS protection"]},
+      {c:"CIA Triad",d:"The three core pillars of information security: Confidentiality, Integrity, Availability. Every security control maps to at least one. A HIPAA breach breaks Confidentiality at minimum.",t:["foundation","core concept","real-world"]},
+    ]
+  },
+  "03 – Core Principles": {
+    icon:"🏛️", color:"#3fb950", type:"cards",
+    items:[
+      {c:"Least Privilege (PoLP)",d:"Users and systems get only the minimum permissions needed to do their job — nothing more. Limits blast radius of any compromise. Staff shouldn't have global admin.",t:["RBAC","JIT access","access control","real-world"]},
+      {c:"Zero Trust",d:"Never trust, always verify. No user or device is trusted by default — even inside the network. Requires continuous verification. 'Inside the firewall' is not trusted by default.",t:["identity","MFA","micro-segmentation"]},
+      {c:"Defense in Depth",d:"Layered security — physical, network, endpoint, application, data. No single control is relied upon alone. A real-world AiTM attack bypassed MFA — other layers were needed.",t:["layered","redundant controls","real-world"]},
+      {c:"Separation of Duties",d:"No single person has complete control over a critical process. Requires multiple people to complete sensitive actions. Prevents fraud and insider threats.",t:["fraud prevention","insider threat","GRC"]},
+      {c:"Need-to-Know",d:"Access to information is granted only if the person actually needs it for their role — beyond just having clearance. HIPAA's minimum necessary standard is an expression of this.",t:["access control","confidentiality","HIPAA","real-world"]},
+      {c:"Non-Repudiation",d:"Ensures someone cannot deny performing an action. Achieved via digital signatures and audit logs. Critical for legal proceedings after an incident.",t:["accountability","digital signatures","audit","forensics"]},
+      {c:"Authentication vs Authorization",d:"Authentication = proving who you are (identity). Authorization = what you're allowed to do (permissions). Auth comes first, always. Getting these backwards is a design flaw.",t:["IAM","identity","access"]},
+      {c:"Accountability & Auditing",d:"Every action is logged and traceable to a specific user. Without this you can't prove what happened during an incident or satisfy a HIPAA audit.",t:["logging","SIEM","forensics","real-world"]},
+      {c:"SIEM",d:"Security Information and Event Management. Aggregates and correlates logs from across the environment. Wazuh is your home lab SIEM. Elastic/SIEM is a contracted MSSP.",t:["Wazuh","logging","detection","real-world"]},
+      {c:"Attack Surface Reduction",d:"Minimize the number of entry points an attacker can exploit. Disable unused services, ports, protocols, accounts. Fewer doors = less exposure.",t:["hardening","risk reduction"]},
+    ]
+  },
+  "04 – Common Attacks": {
+    icon:"⚔️", color:"#f78166", type:"cards",
+    items:[
+      {c:"Malware",d:"Umbrella term for malicious software: viruses, worms, ransomware, trojans, spyware. Spreads via email, downloads, exploits, USB.",t:["endpoint","EDR"]},
+      {c:"Virus",d:"Malicious code that attaches to legitimate files. Requires user action to spread. Hard to detect because it hides in real processes.",t:["malware","endpoint"]},
+      {c:"Worm",d:"Self-replicating malware that spreads across networks without user action. Exploits unpatched vulnerabilities. WannaCry used SMBv1 (port 445).",t:["malware","patching","SMB"]},
+      {c:"Ransomware",d:"Encrypts victim files and demands payment for the decryption key. Healthcare systems are prime targets — patient data is life-critical. Backup strategy is your defense.",t:["malware","backup","healthcare","real-world"]},
+      {c:"Trojan",d:"Malware disguised as legitimate software. User installs it willingly. Often creates backdoors or drops additional payloads.",t:["malware","social engineering"]},
+      {c:"Phishing",d:"Fraudulent emails designed to trick users into clicking links, entering credentials, or downloading malware. #1 initial access vector for enterprise breaches.",t:["email","social engineering","awareness"]},
+      {c:"Spear Phishing",d:"Targeted phishing aimed at a specific person or org using personalized details to appear legitimate. More convincing, lower volume.",t:["phishing","targeted attack"]},
+      {c:"Vishing",d:"Voice phishing — attackers call posing as IT support, vendors, or executives to extract credentials or gain access.",t:["social engineering","phone"]},
+      {c:"Social Engineering",d:"Manipulating people into revealing info or taking actions that compromise security. Exploits trust, urgency, authority — not technology.",t:["human factor","phishing","pretexting"]},
+      {c:"AiTM (Adversary-in-the-Middle)",d:"Attacker sits between user and legitimate site using a reverse proxy, relaying traffic to steal session tokens AFTER MFA. Bypasses MFA entirely. The Tycoon 2FA kit used this in a documented AiTM incident.",t:["MFA bypass","session hijacking","Tycoon 2FA","real-world","critical"]},
+      {c:"BEC (Business Email Compromise)",d:"Attacker gains control of a legitimate business email account and uses it for fraud, wire transfers, or further phishing. What hit the organization — compromised M365 account used to send phishing internally.",t:["email","attack","real-world","critical"]},
+      {c:"SQL Injection (SQLi)",d:"Inserting malicious SQL code into input fields to manipulate a database. Can expose, modify, or delete data. OWASP Top 10.",t:["web attack","OWASP","database"]},
+      {c:"Cross-Site Scripting (XSS)",d:"Injecting malicious scripts into web pages viewed by other users. Steals session cookies, redirects users. Reflected (one victim) vs. Stored (all visitors).",t:["web attack","OWASP"]},
+      {c:"Broken Access Control",d:"Users can access resources or functions beyond their intended permissions. OWASP #1 web vulnerability. Horizontal (same level) vs. Vertical (privilege escalation).",t:["web attack","authorization","OWASP"]},
+      {c:"Supply Chain Attack",d:"Compromising a trusted vendor or software provider to reach the actual target downstream. SolarWinds is the textbook example. Review your vendor contracts.",t:["third party","vendor risk","real-world"]},
+      {c:"Insider Threat",d:"Malicious or negligent actions by someone with legitimate access — employee, contractor, or vendor. Hardest to detect. DLP and behavioral analytics are key controls.",t:["insider","access control","monitoring"]},
+      {c:"DDoS",d:"Distributed Denial of Service. Flood of traffic overwhelms a system until it goes down. Breaks Availability. Cloudflare/Akamai for web; OPNsense rate limiting internally.",t:["availability","network attack"]},
+      {c:"Credential Stuffing",d:"Using leaked username/password pairs from one breach to attack other sites. Works because people reuse passwords. MFA and password managers are the defense.",t:["passwords","authentication","breach"]},
+      {c:"Pass-the-Hash",d:"Attack using a stolen NTLM hash to authenticate without knowing the plaintext password. Mitigated by Kerberos, MFA, and Protected Users group in AD.",t:["NTLM","lateral movement","AD attack"]},
+      {c:"Kerberoasting",d:"Attacker requests Kerberos service tickets for SPNs, then cracks them offline to get service account passwords. Service accounts often have weak passwords and high privileges.",t:["Kerberos","AD attack","lateral movement"]},
+      {c:"Golden Ticket Attack",d:"Forging a Kerberos TGT using the KRBTGT hash from a compromised DC. Provides persistent admin access to the entire domain. Domain-level compromise.",t:["Kerberos","AD attack","critical"]},
+    ]
+  },
+  "05 – Networking": {
+    icon:"🌐", color:"#79c0ff", type:"cards",
+    items:[
+      {c:"OSI Model",d:"7-layer framework: Physical → Data Link → Network → Transport → Session → Presentation → Application. Use 'Please Do Not Throw Sausage Pizza Away' to remember order.",t:["foundation","certification"]},
+      {c:"OSI Layer 1 – Physical",d:"Raw bits over cable/wireless/fiber. Issues here = bad cables, broken NIC, signal interference. Check cables first when troubleshooting.",t:["OSI","hardware","troubleshooting"]},
+      {c:"OSI Layer 2 – Data Link",d:"Local network communication via MAC addresses. Switches live here. Deals in frames (not packets). ARP operates at this layer. VLANs are a Layer 2 concept.",t:["OSI","switching","MAC","VLAN"]},
+      {c:"OSI Layer 3 – Network",d:"IP addressing and routing. Routers live here. Deals in packets. Subnetting, routing protocols (OSPF, BGP), and NAT happen here.",t:["OSI","routing","IP","subnetting"]},
+      {c:"OSI Layer 4 – Transport",d:"TCP (reliable, connection-based) and UDP (fast, connectionless). Handles segmentation, flow control, error recovery. Port numbers live here.",t:["OSI","TCP","UDP","ports"]},
+      {c:"OSI Layer 7 – Application",d:"Where user-facing protocols live: HTTP, DNS, SMTP, FTP. Where most web attacks target. Your firewall with deep packet inspection works here.",t:["OSI","protocols","web"]},
+      {c:"TCP vs UDP",d:"TCP = reliable, 3-way handshake (SYN/SYN-ACK/ACK), ordered, flow-controlled. UDP = fast, fire-and-forget, no guarantee. TCP for web/email/file. UDP for DNS/VoIP/streaming.",t:["protocols","transport","certification"]},
+      {c:"TCP 3-Way Handshake",d:"SYN → SYN-ACK → ACK. Client initiates with SYN, server responds SYN-ACK, client confirms ACK. Session established. SYN flood attacks overwhelm this process.",t:["TCP","protocols","DoS"]},
+      {c:"IP Address",d:"Logical address identifying a device. Layer 3. IPv4 = 32-bit dotted decimal (192.168.1.1). IPv6 = 128-bit hex (2001:db8::1). Private ranges: 10.x, 172.16-31.x, 192.168.x.",t:["addressing","routing"]},
+      {c:"MAC Address",d:"Physical hardware address burned into NIC. Layer 2. 6 pairs hex: AA:BB:CC:DD:EE:FF. First 3 octets = OUI (manufacturer). Can be spoofed. Used in ARP.",t:["Layer 2","switching"]},
+      {c:"ARP",d:"Address Resolution Protocol. Maps IP → MAC on local network. Broadcast: 'Who has 192.168.1.1?' — Reply: 'I do, here's my MAC.' ARP poisoning/spoofing is a MITM attack.",t:["Layer 2","Layer 3","protocol","real-world"]},
+      {c:"DNS",d:"Domain Name System. Translates names → IPs. Port 53 (UDP mostly, TCP for large responses/zone transfers). DNS poisoning redirects traffic. DNSSEC adds integrity.",t:["protocol","port 53","critical"]},
+      {c:"DHCP",d:"Automatically assigns IP, subnet mask, gateway, DNS to devices. Ports 67 (server) / 68 (client). Rogue DHCP server = network attack. DHCP snooping is the defense.",t:["protocol","addressing"]},
+      {c:"NAT",d:"Network Address Translation. Maps private IPs to a public IP for internet access. Hides internal topology. PAT (Port Address Translation) = many-to-one. Your home router does PAT.",t:["routing","addressing","privacy"]},
+      {c:"Subnetting /24",d:"/24 = 256 addresses, 254 usable, mask 255.255.255.0. /25 = 128 addr. /26 = 64. /27 = 32. Many small networks use /24 on most segments. Segmentation = security.",t:["subnetting","certification","real-world"]},
+      {c:"VLAN",d:"Virtual LAN. Logically segments a network without physical separation. VLANs can be configured on managed switches. Medical devices should be on isolated VLANs.",t:["segmentation","switching","real-world"]},
+      {c:"802.1Q",d:"VLAN tagging standard for trunk ports. Adds a 4-byte tag to frames identifying the VLAN. Required for VLAN traffic to cross switch-to-switch and switch-to-router links.",t:["VLAN","switching","certification"]},
+      {c:"Firewall",d:"Filters network traffic based on rules. Stateful (tracks connection state) vs. Stateless (per-packet). Next-gen (NGFW) adds DPI, IPS, and app awareness. OPNsense is your next home lab deployment.",t:["network security","perimeter","real-world"]},
+      {c:"IDS vs IPS",d:"IDS (Intrusion Detection System) = monitors and alerts, no blocking. IPS (Intrusion Prevention System) = monitors and blocks. Suricata can run as either. In-line = IPS, passive = IDS.",t:["detection","Suricata","real-world"]},
+      {c:"VPN",d:"Virtual Private Network. Encrypts traffic over public networks. Site-to-site (office-to-office) vs. Remote access (user-to-network). Tailscale is your current solution — WireGuard-based.",t:["encryption","remote access","real-world"]},
+      {c:"Proxy / Reverse Proxy",d:"Forward proxy = client hides behind it (anonymity, content filtering). Reverse proxy = server hides behind it (load balancing, WAF). AiTM attacks use a malicious reverse proxy.",t:["web","privacy","AiTM"]},
+      {c:"Network Segmentation",d:"Dividing a network into isolated zones. Medical devices, guest WiFi, staff, and servers should each be separate segments. Limits lateral movement after a breach.",t:["segmentation","healthcare","real-world"]},
+    ]
+  },
+  "06 – Cryptography": {
+    icon:"🔑", color:"#d2a8ff", type:"cards",
+    items:[
+      {c:"Hashing",d:"One-way function converting data to fixed-size digest. Cannot be reversed. SHA-256(input) always produces same output. Tiny input change = completely different hash (avalanche effect).",t:["integrity","one-way"]},
+      {c:"SHA-256",d:"Secure Hash Algorithm, 256-bit output. Industry standard for file integrity, digital signatures, and password storage. Produces 64-char hex string. Used in blockchain and TLS.",t:["hashing","integrity"]},
+      {c:"MD5",d:"128-bit hash. Considered cryptographically broken — collision attacks exist (two different inputs can produce same hash). Never use for security. Still used for non-security checksums.",t:["hashing","deprecated","vulnerable"]},
+      {c:"Symmetric Encryption",d:"Same key encrypts AND decrypts. Fast — good for bulk data. Key distribution is the challenge. Example: AES. Used for data at rest and TLS session data.",t:["encryption","AES","key management"]},
+      {c:"Asymmetric Encryption",d:"Public/private key pair. Public key encrypts (anyone can), private key decrypts (only you). Slower. Solves key distribution problem. Used in TLS handshake, digital signatures, SSH.",t:["encryption","PKI","RSA","SSH"]},
+      {c:"AES",d:"Advanced Encryption Standard. Symmetric. 128/192/256-bit keys. NIST standard since 2001. AES-256 is considered quantum-resistant. Used everywhere: TLS, disk encryption, VPNs.",t:["encryption","symmetric","standard"]},
+      {c:"RSA",d:"Asymmetric algorithm based on factoring large prime numbers. Common key sizes: 2048, 4096-bit. Used in TLS certificates, SSH, digital signatures. Slower than AES but solves key exchange.",t:["encryption","asymmetric","PKI"]},
+      {c:"TLS",d:"Transport Layer Security. Encrypts data in transit (HTTPS is HTTP + TLS). Replaced SSL. TLS 1.2+ required. TLS 1.0/1.1 deprecated. Uses asymmetric for handshake, symmetric for data.",t:["encryption","HTTPS","protocols","compliance"]},
+      {c:"PKI",d:"Public Key Infrastructure. The system of CAs, certificates, CRLs, and trust that makes TLS and digital signatures work. Your M365 environment uses Microsoft PKI for S/MIME and Intune.",t:["certificates","asymmetric","trust"]},
+      {c:"Digital Signature",d:"Proves authenticity AND integrity. Sender hashes the document, encrypts hash with private key. Receiver decrypts with public key and compares hashes. Provides non-repudiation.",t:["asymmetric","non-repudiation","integrity"]},
+      {c:"Certificate Authority (CA)",d:"Trusted entity that signs digital certificates. Browsers trust a root CA store. Chain of trust: Root CA → Intermediate CA → Leaf certificate. Self-signed certs trigger browser warnings.",t:["PKI","TLS","trust"]},
+      {c:"Salting",d:"Adding unique random data to a password before hashing. Prevents rainbow table attacks — even same passwords produce different hashes. Each user gets a unique salt stored alongside the hash.",t:["hashing","passwords","defense"]},
+      {c:"Key Exchange (Diffie-Hellman)",d:"Protocol allowing two parties to establish a shared secret over an insecure channel without transmitting the key. Foundation of TLS. Ephemeral DH (DHE/ECDHE) provides Perfect Forward Secrecy.",t:["encryption","TLS","key management"]},
+      {c:"Perfect Forward Secrecy (PFS)",d:"Each TLS session uses a unique temporary key. If long-term private key is compromised later, past sessions can't be decrypted. ECDHE achieves PFS. Look for it in cipher suites.",t:["TLS","encryption","security"]},
+    ]
+  },
+  "07 – Security Tools": {
+    icon:"🛠️", color:"#56d364", type:"cards",
+    items:[
+      {c:"Nmap",d:"Network Mapper. Port scanning, service detection, OS fingerprinting, script scanning (NSE). Core recon tool. nmap -sV -O -p- target. SYN scan (-sS) is stealthier than full connect.",t:["scanning","recon","open source"]},
+      {c:"Wireshark",d:"GUI packet capture and analysis. Capture on interface, filter by protocol/IP/port. Useful for: troubleshooting, detecting ARP poisoning, analyzing malware C2 traffic, DHCP issues.",t:["pcap","forensics","network","real-world"]},
+      {c:"Tcpdump",d:"CLI packet capture. tcpdump -i eth0 -n -w capture.pcap. Filter: 'host 10.0.0.1 and port 443'. Lightweight, scriptable. Use when Wireshark isn't available.",t:["pcap","CLI","network"]},
+      {c:"Metasploit",d:"Exploitation framework. Use: msfconsole → search exploit → use → set options → run. Meterpreter is the post-exploitation payload. Used in authorized pen tests only.",t:["exploitation","red team","pen testing"]},
+      {c:"Burp Suite",d:"Web app proxy. Intercepts HTTP/HTTPS requests, allows modification and replay. Spider, scanner, intruder, repeater. Community edition is free. Use for web vuln testing.",t:["web","proxy","pen testing"]},
+      {c:"Zeek",d:"Network analysis framework (formerly Bro). Passively monitors traffic, generates structured logs (conn.log, dns.log, http.log, ssl.log). In your home lab. Logs feed into Wazuh SIEM.",t:["network","monitoring","home lab","real-world"]},
+      {c:"Suricata",d:"Open-source IDS/IPS. Signature-based + anomaly detection. YAML rules. Can run passive (IDS) or in-line (IPS). ET Open rules are free. In your home lab alongside Zeek.",t:["IDS","IPS","home lab","real-world"]},
+      {c:"Wazuh",d:"Open-source SIEM + XDR. Agents on endpoints, aggregates logs, FIM, vulnerability detection, compliance reporting. Core of your home lab. Can ingest Zeek/Suricata logs.",t:["SIEM","XDR","home lab","real-world"]},
+      {c:"SentinelOne",d:"EDR platform at the organization. Behavioral AI detection, automated response, threat hunting. Custom STAR rules can be built for behavioral detection.",t:["EDR","endpoint","real-world"]},
+      {c:"OPNsense",d:"Open-source firewall/router platform. Next deployment in your home lab. Features: VLAN support, IDS/IPS (Suricata), VPN (WireGuard/OpenVPN), pfBlockerNG-equivalent (Zenarmor).",t:["firewall","home lab","real-world"]},
+      {c:"Nessus / OpenVAS",d:"Vulnerability scanners. Credentialed scan = agent or admin creds, finds far more. Uncredentialed = external view. Prioritize by CVSS score. Scan before and after patching.",t:["scanning","vuln management"]},
+      {c:"John the Ripper / Hashcat",d:"Password cracking. John: CPU-based, good for quick runs. Hashcat: GPU-accelerated, much faster for bulk cracking. Use wordlists (rockyou.txt) and rule-based mutation.",t:["passwords","cracking","pen testing"]},
+      {c:"Volatility",d:"Memory forensics framework. Analyze RAM dumps: running processes, network connections, injected code, credentials in memory. Critical for detecting fileless malware.",t:["forensics","DFIR","memory"]},
+      {c:"Autopsy / FTK",d:"Disk forensics platforms. Timeline analysis, deleted file recovery, keyword search, hash verification. Autopsy is free/open-source. Use write blockers before imaging.",t:["forensics","DFIR","disk"]},
+      {c:"Mimikatz",d:"Credential dumping tool. Extracts plaintext passwords, hashes, Kerberos tickets from LSASS memory. Blocked by Credential Guard. You added Mimikatz hashes to SentinelOne blocklist.",t:["credentials","attack","red team","real-world"]},
+    ]
+  },
+  "08 – Linux Basics": {
+    icon:"🐧", color:"#ffa657", type:"cards",
+    items:[
+      {c:"pwd / ls / cd",d:"Core navigation: pwd = current directory, ls = list contents, cd = change dir. ls -lah shows hidden files, sizes, permissions. Muscle memory — you should type these without thinking.",t:["commands","navigation"]},
+      {c:"chmod / chown",d:"chmod = change permissions (chmod 755 file = rwxr-xr-x). chown = change owner (chown user:group file). 4=read, 2=write, 1=execute. Misconfig here = privilege escalation path.",t:["permissions","commands","security"]},
+      {c:"grep / grep -r",d:"Search file content for patterns. grep 'password' /etc/shadow. grep -r 'error' /var/log/. Pipe output: cat auth.log | grep 'Failed'. Case-insensitive: grep -i. Invert: grep -v.",t:["commands","search","forensics","real-world"]},
+      {c:"ps / top / htop",d:"Process viewer. ps aux = all processes with user/command. top = live CPU/mem. htop = color interactive. Look for: unusual processes, high CPU with weird names, processes masquerading as system.",t:["commands","monitoring","threat hunting"]},
+      {c:"netstat / ss",d:"Network connections. ss -tulpn = listening TCP/UDP ports with PIDs. netstat -an = all connections. Look for: unexpected listening services, unusual outbound connections (C2 beaconing).",t:["commands","network","hardening","real-world"]},
+      {c:"find",d:"Find files. find / -name 'passwd' 2>/dev/null. find / -perm /4000 (SUID files). find /tmp -newer /etc/passwd (recently modified). Powerful for forensics and privilege escalation checks.",t:["commands","forensics","search","privilege escalation"]},
+      {c:"sudo / su",d:"sudo = run one command as root (logged). su = switch user entirely (less auditable). sudo -l = what can I run as sudo? Misconfigured sudo entries are common privesc paths.",t:["commands","privilege","escalation"]},
+      {c:"cron / crontab",d:"Task scheduler. crontab -l = list jobs. /etc/crontab = system cron. /etc/cron.d/ = additional jobs. Attackers plant persistence here. Check for unusual entries during IR.",t:["persistence","scheduling","threat hunting","IR"]},
+      {c:"journalctl / /var/log",d:"Log access. journalctl -u ssh = SSH service logs. tail -f /var/log/auth.log = live auth events. /var/log/syslog, messages, kern.log. Critical for IR on Linux endpoints.",t:["logging","IR","forensics"]},
+      {c:"File Permissions (rwx)",d:"Three sets: owner, group, others. r=4, w=2, x=1. chmod 755 = 7(owner:rwx) 5(group:rx) 5(others:rx). SUID (4000), SGID (2000), Sticky (1000). SUID on scripts = privesc risk.",t:["permissions","access control","privilege escalation"]},
+      {c:"iptables / ufw",d:"Linux firewall. ufw allow 22/tcp, ufw deny 23. iptables is more granular. On CachyOS/Parrot you use these. Check rules: iptables -L -n -v. Unexpected ACCEPT rules = concern.",t:["firewall","hardening","real-world"]},
+      {c:"apt / yum / dnf / pacman",d:"Package managers. apt (Debian/Ubuntu), yum/dnf (RHEL/CentOS), pacman (Arch/CachyOS). Keep updated: apt upgrade. Check installed: dpkg -l. Outdated packages = known CVEs.",t:["commands","package management","patching","real-world"]},
+      {c:"SSH hardening",d:"Disable root login (PermitRootLogin no), use key auth only (PasswordAuthentication no), non-default port (optional), limit users (AllowUsers). Config: /etc/ssh/sshd_config.",t:["hardening","SSH","real-world"]},
+      {c:"Environment Variables",d:"export VAR=value. env = list all. Attackers abuse PATH hijacking and LD_PRELOAD to execute malicious code. Check PATH for unusual entries during IR.",t:["commands","security","privilege escalation"]},
+    ]
+  },
+  "09 – Windows Security": {
+    icon:"🪟", color:"#ff7b72", type:"cards",
+    items:[
+      {c:"Active Directory (AD)",d:"Microsoft directory service. Manages users, computers, groups, OUs, and policies across Windows domains. Target of nearly every enterprise breach — own AD = own the network.",t:["AD","identity","enterprise","critical"]},
+      {c:"Domain Controller (DC)",d:"Server running AD DS. All authentication and policy enforcement flows through it. Tiered admin model: Tier 0 = DC access only. DC compromise = full domain compromise.",t:["AD","authentication","critical"]},
+      {c:"Group Policy (GPO)",d:"Centrally enforces settings on users and computers. Security baseline, password policy, software deployment, drive mapping. Misconfig can be privilege escalation: writable GPOs.",t:["AD","policy","hardening"]},
+      {c:"NTLM",d:"Older Windows auth protocol. Challenge-response using password hash. Vulnerable to Pass-the-Hash, relay attacks. Being replaced by Kerberos. Disable NTLMv1 immediately. NTLMv2 is tolerable temporarily.",t:["authentication","legacy","vulnerability"]},
+      {c:"Kerberos",d:"Primary Windows auth. Uses tickets: TGT (from DC/KDC), then TGS (for service access). Vulnerable to Kerberoasting (service ticket cracking), AS-REP roasting, and Golden Ticket attacks.",t:["authentication","AD","tickets","critical"]},
+      {c:"LSASS",d:"Local Security Authority Subsystem Service. Stores credentials in memory: NTLM hashes, Kerberos tickets, cleartext creds (in some configs). Primary target of Mimikatz. Protect with Credential Guard.",t:["credentials","critical","Windows"]},
+      {c:"Credential Guard",d:"Virtualization-based security that isolates LSASS in a secured container. Prevents Mimikatz from dumping creds. Requires UEFI + Virtualization. Enable via GPO.",t:["defense","Windows","credentials","hardening"]},
+      {c:"Windows Registry",d:"Hierarchical database storing OS and app config. HKLM = local machine. HKCU = current user. Attackers use Run/RunOnce keys for persistence. Event ID 4657 = registry modification.",t:["Windows","persistence","forensics"]},
+      {c:"Windows Event Logs",d:"See Event IDs section for full reference. Key logs: Security (auth/access), System (OS events), Application (app events), Sysmon (detailed process/network), PowerShell.",t:["logging","forensics","SIEM","real-world"]},
+      {c:"Sysmon",d:"Extended Windows logging by Sysinternals. Logs process creation with full CLI, network connections, registry changes, file creation. Invaluable for threat hunting. Use SwiftOnSecurity config.",t:["logging","threat hunting","detection","real-world"]},
+      {c:"LOLBins (Living Off the Land)",d:"Attackers use legitimate Windows binaries: certutil (download files), mshta (execute JS), wmic (remote execution), regsvr32, rundll32. Bypass AV because tools are signed/trusted.",t:["evasion","red team","detection"]},
+      {c:"PowerShell Security",d:"Enable: ScriptBlock logging (Event 4104), Module logging, Transcription. Constrained Language Mode limits capabilities. AMSI (Antimalware Scan Interface) inspects scripts.",t:["scripting","logging","detection","hardening"]},
+      {c:"Windows Defender",d:"Built-in AV/EDR. Defender for Endpoint (MDE) is the enterprise version with EDR capabilities. Enable real-time protection, cloud-delivered protection, tamper protection.",t:["AV","EDR","Windows","defense"]},
+      {c:"Protected Users Group",d:"AD security group with hardened Kerberos settings: no NTLM, no DES/RC4, no delegation, short TGT lifetime. Add privileged accounts here. Breaks Mimikatz credential extraction.",t:["AD","defense","credentials","hardening"]},
+      {c:"AppLocker / WDAC",d:"Application allowlisting. AppLocker: rule-based, path/hash/publisher. WDAC (Windows Defender Application Control): kernel-enforced, harder to bypass. Prevents unauthorized execution.",t:["hardening","allowlisting","defense"]},
+    ]
+  },
+  "10 – IAM": {
+    icon:"🪪", color:"#e3b341", type:"cards",
+    items:[
+      {c:"MFA",d:"Multi-Factor Authentication. Requires 2+ independent factors. Stops most credential attacks — but AiTM bypasses it by stealing the session AFTER successful MFA. Layer it with Conditional Access.",t:["authentication","identity","critical","real-world"]},
+      {c:"MFA Factor Types",d:"Something you Know (password, PIN — weakest). Something you Have (authenticator app, YubiKey, SMS — medium). Something you Are (biometrics — strong). Need 2+ different categories.",t:["MFA","authentication factors","IAM"]},
+      {c:"FIDO2 / Passkeys",d:"Phishing-resistant authentication using cryptographic keys tied to device + biometric/PIN. Cannot be phished or stolen via AiTM. Microsoft Authenticator, YubiKey, Windows Hello. The future of auth.",t:["MFA","phishing-resistant","identity","future"]},
+      {c:"RBAC",d:"Role-Based Access Control. Assign permissions to roles, not individuals. User gets role, role has permissions. Easier to audit and modify. Common in M365 and EHR environments.",t:["access control","least privilege","real-world"]},
+      {c:"ABAC",d:"Attribute-Based Access Control. Access decisions based on attributes: department, location, device compliance, time of day, risk score. More granular than RBAC. Used in Conditional Access policies.",t:["access control","advanced","Conditional Access"]},
+      {c:"SSO (Single Sign-On)",d:"One authentication event grants access to multiple apps. Convenient but a single point of failure — compromise SSO = access to everything. Use FIDO2 or strong MFA on SSO accounts.",t:["identity","federation","risk"]},
+      {c:"OAuth 2.0",d:"Authorization framework, not authentication. Grants apps limited access to resources on behalf of users. 'Login with Google' = OAuth. Access tokens, refresh tokens, scopes.",t:["authorization","federation","web","M365"]},
+      {c:"SAML 2.0",d:"XML-based authentication/authorization standard for SSO. Enterprise staple. SP (Service Provider) redirects to IdP (Identity Provider). Assertions contain user attributes and permissions.",t:["SSO","federation","enterprise"]},
+      {c:"Entra ID (Azure AD)",d:"Microsoft's cloud identity platform. Manages M365 users, MFA, Conditional Access, PIM, device management. Common in healthcare M365 environments. Compromise here = access to all M365 services.",t:["Microsoft","identity","M365","real-world","critical"]},
+      {c:"Conditional Access",d:"Azure/Entra ID policy engine. Grant/block/require MFA based on: user, location (named locations), device compliance, app, sign-in risk score. Key defense against AiTM and stolen credentials.",t:["MFA","Azure","identity","real-world","defense"]},
+      {c:"PIM (Privileged Identity Management)",d:"Azure AD feature. Just-in-time elevation for admin roles. Requires approval and MFA. Admin rights expire automatically. Logs all privileged access. Best practice for all admin accounts.",t:["least privilege","JIT","Azure","admin"]},
+      {c:"Zero Standing Privileges (ZSP)",d:"No persistent admin rights anywhere. All elevated access is granted JIT and expires. Achieved via PIM in Azure AD, PAM tools (CyberArk, BeyondTrust) on-prem.",t:["least privilege","JIT","admin"]},
+      {c:"Session Token / Cookie Theft",d:"Stealing authenticated session token to impersonate user without needing credentials. What AiTM exploits — the attack harvests the cookie AFTER MFA. Conditional Access + CAE are mitigations.",t:["AiTM","session","attack","real-world","critical"]},
+      {c:"Continuous Access Evaluation (CAE)",d:"Real-time session validation in M365/Azure AD. If user account is disabled, IP changes, or risk is detected, token is immediately revoked mid-session. Partially mitigates AiTM token theft.",t:["Azure","defense","AiTM","real-world"]},
+    ]
+  },
+  "11 – Cloud Security": {
+    icon:"☁️", color:"#39d0d8", type:"cards",
+    items:[
+      {c:"Shared Responsibility Model",d:"Cloud provider secures infrastructure (physical, hypervisor, network). Customer secures data, IAM configs, app code, and OS (in IaaS). Most breaches happen in the customer's half.",t:["cloud","fundamental","compliance"]},
+      {c:"IaaS vs PaaS vs SaaS",d:"IaaS (EC2, Azure VMs) = you manage OS up. PaaS (App Service, Lambda) = you manage app/data. SaaS (M365, Salesforce) = provider manages everything, you manage users/data. Security responsibility shifts with each.",t:["cloud","service models"]},
+      {c:"AWS IAM",d:"Controls who can do what to which AWS resource. Users, Groups, Roles, Policies. Principle of least privilege is critical. Misconfigured IAM = most common cloud breach vector. Use roles over access keys.",t:["cloud","access control","AWS","critical"]},
+      {c:"Security Groups (AWS)",d:"Instance-level virtual firewall. Stateful — return traffic auto-allowed. Inbound and outbound rules. Default: deny all inbound, allow all outbound. Never 0.0.0.0/0 inbound on SSH/RDP.",t:["AWS","firewall","cloud","hardening"]},
+      {c:"S3 Bucket Security",d:"Object storage. Public buckets have caused countless breaches. Default should be private (Block Public Access). Use bucket policies + IAM. Enable versioning and MFA delete for sensitive data.",t:["AWS","misconfiguration","data protection","critical"]},
+      {c:"CloudTrail / Azure Monitor",d:"Cloud audit logging. CloudTrail logs all AWS API calls. Azure Monitor + Activity Log does the same for Azure. Essential for IR. Enable in all regions. Export to SIEM.",t:["logging","audit","cloud","IR","real-world"]},
+      {c:"Microsoft Defender for Endpoint (MDE)",d:"Enterprise EDR integrated with Microsoft 365. Behavioral detection, automated investigation, threat hunting via Advanced Hunting (KQL). Integrates with Sentinel. Replaces basic Defender AV.",t:["EDR","Microsoft","M365","real-world"]},
+      {c:"Microsoft Sentinel",d:"Cloud-native SIEM/SOAR. Ingests logs from M365, Azure, on-prem, third-party. KQL queries for threat hunting. Playbooks for automated response. Priced per GB ingested.",t:["SIEM","Microsoft","M365","KQL"]},
+      {c:"Microsoft Purview",d:"Data governance and compliance platform. DLP policies, sensitivity labels, insider risk management, compliance manager. Relevant for HIPAA ePHI protection in M365.",t:["compliance","DLP","HIPAA","M365","real-world"]},
+      {c:"Microsoft Secure Score",d:"Security posture metric for M365/Azure. Measures configuration against best practices. Each improvement has an action item. Use it to prioritize hardening efforts. Target: as high as practical.",t:["M365","hardening","posture","real-world"]},
+      {c:"Cloud Misconfiguration",d:"#1 cause of cloud breaches: public S3 buckets, overprivileged IAM, exposed management ports (SSH/RDP), unencrypted storage, missing logging, default credentials left enabled.",t:["cloud","risk","vulnerability"]},
+      {c:"CSPM (Cloud Security Posture Management)",d:"Continuously assesses cloud config against security benchmarks. AWS Security Hub, Azure Defender for Cloud, Prisma Cloud. Identifies misconfigs before attackers do.",t:["cloud","posture","tools"]},
+    ]
+  },
+  "12 – Frameworks & Compliance": {
+    icon:"📋", color:"#7ee787", type:"cards",
+    items:[
+      {c:"NIST CSF 2.0",d:"Cybersecurity Framework. Six functions: Govern (strategy/risk), Identify (assets/risk), Protect (controls), Detect (monitoring), Respond (IR), Recover (resilience). Voluntary but widely adopted.",t:["framework","NIST","GRC"]},
+      {c:"NIST SP 800-53 Rev 5",d:"Comprehensive control catalog for federal/high-security systems. 20 control families. HIPAA maps to specific 800-53 controls. Referenced in contracts and compliance programs.",t:["framework","NIST","controls","HIPAA"]},
+      {c:"HIPAA Security Rule",d:"Requires covered entities to implement administrative, physical, and technical safeguards for ePHI. Required vs. Addressable standards. OCR enforces with audits and breach investigations.",t:["HIPAA","healthcare","compliance","real-world","critical"]},
+      {c:"HIPAA Breach Notification Rule",d:"Covered entities must notify: affected individuals (within 60 days), HHS/OCR (within 60 days), and media (if 500+ in a state). You identified a likely timeline violation from the Dec 2025 breach.",t:["HIPAA","breach","real-world","critical"]},
+      {c:"HIPAA Privacy Rule",d:"Governs use and disclosure of PHI. Minimum necessary standard. Patient rights to access their records. Authorization requirements for uses beyond treatment/payment/operations.",t:["HIPAA","healthcare","privacy","real-world"]},
+      {c:"HICP (405d)",d:"Health Industry Cybersecurity Practices. HHS voluntary guidance. 5 threat categories, 10 practices (MFA, email protection, patching, etc.). Following HICP demonstrates good-faith OCR defense.",t:["HIPAA","healthcare","guidance","real-world"]},
+      {c:"OCR Enforcement",d:"Office for Civil Rights enforces HIPAA. Investigation triggers: breach report, patient complaint, random audit. Four penalty tiers based on culpability: $127–$1.9M per violation category/year.",t:["HIPAA","enforcement","real-world","critical"]},
+      {c:"Business Associate Agreement (BAA)",d:"Contract requiring vendors who handle ePHI to meet HIPAA Security Rule. Required before sharing any ePHI with a vendor. Vendors handling ePHI — all should have BAAs.",t:["HIPAA","vendor","real-world","contract"]},
+      {c:"MITRE ATT&CK",d:"Knowledge base of adversary TTPs mapped to 14 tactic categories. Use for: threat modeling, detection gap analysis, IR documentation, red team planning. Framework for your STAR rules in SentinelOne.",t:["threat intel","detection","framework","real-world"]},
+      {c:"NIST IR Lifecycle",d:"Prepare → Detect & Analyze → Contain, Eradicate, Recover → Post-Incident. You followed this during the ENG-20 endpoint incident and the BEC/AiTM breach response.",t:["IR","NIST","real-world"]},
+      {c:"SOC 2 Type II",d:"AICPA audit framework for service providers. Type I = design at a point in time. Type II = operating effectiveness over 6-12 months. Five Trust Service Criteria. Vendors may require this.",t:["framework","audit","compliance","vendor"]},
+      {c:"PCI-DSS v4.0",d:"Required if processing credit cards. 12 requirements. SAQ (Self-Assessment Questionnaire) for smaller merchants. Quarterly network scans + annual pentest for some levels.",t:["compliance","payment","framework"]},
+      {c:"ISO 27001",d:"International information security management standard. ISMS (Information Security Management System). Certifiable. Risk-based approach. Common in enterprise vendor requirements.",t:["framework","international","ISMS"]},
+      {c:"Kill Chain (Lockheed Martin)",d:"7 stages: Recon → Weaponize → Deliver → Exploit → Install → C2 → Actions on Objectives. Break any link = disrupt attack. AiTM attacks can succeed through Deliver → C2 before detection.",t:["attack model","threat modeling","real-world"]},
+      {c:"Risk Formula",d:"Risk = Likelihood × Impact. Inherent Risk = before controls. Residual Risk = after controls. Risk appetite = how much is acceptable. Document in a risk register.",t:["GRC","risk management","compliance"]},
+    ]
+  },
+  "13 – Incident Response": {
+    icon:"🚨", color:"#f0883e", type:"cards",
+    items:[
+      {c:"IR Lifecycle (NIST)",d:"Prepare → Detect & Analyze → Contain, Eradicate, Recover → Post-Incident. You applied this to the ENG-20 malware incident and the Dec 2025 BEC/AiTM breach.",t:["IR","NIST","framework","real-world"]},
+      {c:"IR Plan Components",d:"Roles & responsibilities, communication plan, asset inventory, playbooks, escalation paths, legal/privacy contacts, out-of-band comms, evidence handling procedures, recovery priorities.",t:["IR","planning","GRC"]},
+      {c:"Triage",d:"First step: is this real? Confirm the alert is a true positive. Identify affected systems. Determine initial scope. Document everything from first contact. Don't remediate before you understand scope.",t:["IR","SOC","detection"]},
+      {c:"Containment",d:"Stop the spread without destroying evidence. Short-term: isolate affected systems (network isolation, not power-off). Long-term: clean alternatives. Preserve memory and disk images first.",t:["IR","isolation","forensics"]},
+      {c:"Evidence Collection Order",d:"Order of volatility: RAM first (most volatile), then network state, running processes, disk image, logs. Memory forensics often reveals what disk doesn't. Use write blockers for disk.",t:["IR","forensics","DFIR","evidence"]},
+      {c:"Eradication",d:"Remove the threat completely. Delete malware, close unauthorized access (revoke tokens, reset passwords, remove persistence mechanisms). Scan all systems, not just known affected ones.",t:["IR","remediation"]},
+      {c:"Recovery",d:"Restore from known-good backup or rebuild. Monitor closely for 30 days post-recovery for reinfection or lingering access. Validate integrity before returning to production.",t:["IR","backup","restoration"]},
+      {c:"Post-Incident Review (PIR)",d:"After-action analysis: what happened, how, when, what worked, what failed, what to change. Produces lessons learned document. Drives security improvements. Organizations should conduct one after any breach.",t:["IR","lessons learned","real-world"]},
+      {c:"Chain of Custody",d:"Documentation proving evidence hasn't been tampered with. Log: who collected it, when, where stored, who accessed it, hash value at collection. Required for legal proceedings.",t:["forensics","legal","evidence","DFIR"]},
+      {c:"IOC (Indicator of Compromise)",d:"Evidence of a breach. Types: IP addresses, domain names, file hashes (MD5/SHA1/SHA256), registry keys, URLs, email headers. Add to blocklists and detection rules after incident.",t:["detection","forensics","threat hunting","real-world"]},
+      {c:"DFIR Artifacts (Windows)",d:"Key artifacts: Event Logs (Security/System/Sysmon), Prefetch files (C:\\Windows\\Prefetch), Registry (Run keys, NTUSER.DAT), LNK files, Browser history, MFT ($MFT), USN Journal, SRUM database.",t:["forensics","Windows","DFIR"]},
+      {c:"DFIR Artifacts (Linux)",d:"Key artifacts: /var/log/auth.log, /var/log/syslog, bash_history, /etc/crontab, /etc/passwd, /etc/shadow, /tmp, /proc (running processes), lastlog, wtmp, utmp.",t:["forensics","Linux","DFIR"]},
+      {c:"Memory Forensics",d:"Analyze RAM dumps for: running processes, network connections, injected DLLs, encryption keys in memory, credentials, command history. Volatility is the primary tool. Critical for fileless malware.",t:["forensics","DFIR","memory","Volatility"]},
+      {c:"Playbook vs Runbook",d:"Playbook: high-level strategic guide for an incident type (e.g., ransomware response). Runbook: step-by-step operational procedures. Runbooks are executable; playbooks are decision frameworks.",t:["IR","planning","documentation"]},
+    ]
+  },
+  "14 – Vulnerability Management": {
+    icon:"🔍", color:"#a5d6ff", type:"cards",
+    items:[
+      {c:"Vuln Management Lifecycle",d:"Discover → Prioritize → Remediate → Verify → Report. Continuous process, not a one-time scan. Asset inventory is the foundation — you can't protect what you don't know about.",t:["process","scanning","GRC"]},
+      {c:"CVE",d:"Common Vulnerabilities and Exposures. Unique ID: CVE-YEAR-NUMBER. Published by MITRE, maintained in NVD. Every known vulnerability has one. Your first lookup when a vuln is reported.",t:["vulnerability","identifier"]},
+      {c:"CVSS v3.1",d:"0-10 score. Critical (9.0-10.0), High (7.0-8.9), Medium (4.0-6.9), Low (0.1-3.9), None (0). Factors: attack vector, complexity, privileges required, user interaction, impact on CIA.",t:["vulnerability","scoring","prioritization"]},
+      {c:"EPSS",d:"Exploit Prediction Scoring System. Probability that a CVE will be exploited in the wild within 30 days. Use alongside CVSS: High CVSS + High EPSS = urgent. High CVSS + Low EPSS = less urgent.",t:["vulnerability","prioritization","risk"]},
+      {c:"Patch Management SLAs",d:"Critical (CVSS 9+): 24-72 hours. High (7-8.9): 7 days. Medium (4-6.9): 30 days. Low (0.1-3.9): 90 days. Document these. OCR and HIPAA auditors ask for them.",t:["patching","SLA","compliance","real-world"]},
+      {c:"Credentialed vs Uncredentialed Scan",d:"Credentialed: scanner authenticates as admin, sees installed software, missing patches, configuration issues. Uncredentialed: external view, finds exposed services. Credentialed finds ~4x more issues.",t:["scanning","methodology"]},
+      {c:"Attack Surface Management (ASM)",d:"Continuous discovery of all internet-facing assets. Often finds forgotten systems, shadow IT, misconfigured cloud resources. Shodan/Censys are external scanners you can use to see your own exposure.",t:["scanning","risk","cloud"]},
+      {c:"Zero-Day",d:"Vulnerability unknown to the vendor — no patch exists. High attacker value, high cost. Defense: behavioral detection (EDR), network segmentation, least privilege. Monitor for vendor advisories.",t:["vulnerability","advanced threat","defense"]},
+      {c:"KEV (Known Exploited Vulnerabilities)",d:"CISA's catalog of CVEs actively exploited in the wild. CISA BOD 22-01 requires federal agencies to patch KEV list within deadlines. Use as prioritization input regardless of CVSS score.",t:["vulnerability","CISA","prioritization","compliance"]},
+      {c:"Compensating Controls",d:"When you can't patch immediately, document compensating controls: network isolation, WAF rule, EDR rule, increased monitoring. HIPAA accepts compensating controls with documentation.",t:["GRC","compliance","HIPAA","real-world"]},
+    ]
+  },
+  "15 – Pen Testing": {
+    icon:"🎯", color:"#ffa198", type:"cards",
+    items:[
+      {c:"Penetration Testing",d:"Authorized simulated attack. Goal: find vulnerabilities before attackers do. Always requires written scope, authorization, and rules of engagement BEFORE starting. Document everything.",t:["pen test","red team","authorization"]},
+      {c:"Rules of Engagement (ROE)",d:"Written agreement: scope, targets in/out of scope, allowed techniques, emergency contacts, testing hours, escalation procedures. No ROE = potentially illegal. Get it signed.",t:["pen test","legal","scope","critical"]},
+      {c:"Recon / OSINT",d:"Passive intelligence gathering. WHOIS, Shodan, LinkedIn, job postings, GitHub, Google dorks, certificate transparency logs. Goal: map target without touching it. OSINT Framework is a useful tool.",t:["pen test","recon","OSINT"]},
+      {c:"Scanning / Enumeration",d:"Active discovery: Nmap port scan, service version detection, OS fingerprint, NSE scripts. SMB enumeration (enum4linux), LDAP enumeration, DNS zone transfer attempts.",t:["pen test","Nmap","scanning"]},
+      {c:"Exploitation",d:"Using discovered vulnerabilities to gain access. Metasploit, manual exploits, default credentials, SQLi, XSS. Document: what worked, what didn't, evidence (screenshots, output).",t:["pen test","Metasploit","exploitation"]},
+      {c:"Post-Exploitation",d:"After initial access: situational awareness (whoami, hostname, ipconfig), privilege escalation, lateral movement, persistence, data exfiltration, covering tracks (report, don't actually do).",t:["pen test","red team","post-exploit"]},
+      {c:"Lateral Movement",d:"Moving from initial foothold to other systems. Techniques: Pass-the-Hash, Pass-the-Ticket, Kerberoasting, exploiting trust relationships, RDP/SMB pivoting, token impersonation.",t:["pen test","AD attacks","lateral movement"]},
+      {c:"Privilege Escalation",d:"Elevate from low-privilege to admin/root. Local privesc: SUID abuse, weak service configs, unquoted paths, kernel exploits. Domain privesc: AD attack techniques, misconfigured GPOs.",t:["pen test","escalation","AD"]},
+      {c:"Red vs Blue vs Purple",d:"Red = offensive (attacker mindset). Blue = defensive (defender mindset). Purple = collaborative — red and blue work together to improve detection. Many analysts operate in a Blue/Purple capacity.",t:["careers","SOC","roles","real-world"]},
+      {c:"Reporting",d:"The deliverable that matters. Executive summary (for leadership) + Technical findings (for IT) + Remediation priorities. CVSS score each finding. Include evidence, reproduction steps, and fix guidance.",t:["pen test","documentation","communication"]},
+    ]
+  },
+  "16 – Healthcare & HIPAA": {
+    icon:"🏥", color:"#ff6b9d", type:"cards",
+    items:[
+      {c:"Covered Entity (CE)",d:"Organizations subject to HIPAA: healthcare providers (hospitals, clinics, pharmacies), health plans (insurers), and healthcare clearinghouses. A rural Critical Access Hospital is a CE.",t:["HIPAA","compliance","real-world","critical"]},
+      {c:"Business Associate (BA)",d:"Vendor or contractor who handles ePHI on behalf of a CE. Requires a BAA. Examples: EHR vendors, managed security providers, breach notification services, legal counsel.",t:["HIPAA","vendor","real-world","contract"]},
+      {c:"PHI vs ePHI",d:"PHI = Protected Health Information (any form). ePHI = Electronic PHI (transmitted or stored electronically). HIPAA Security Rule covers ePHI specifically. 18 identifiers make info PHI.",t:["HIPAA","definitions","compliance","real-world"]},
+      {c:"18 PHI Identifiers",d:"Name, address, dates (except year), phone, fax, email, SSN, MRN, health plan ID, account numbers, license numbers, device identifiers, URLs, IP addresses, biometric identifiers, photo, and any unique identifier.",t:["HIPAA","PHI","compliance"]},
+      {c:"Minimum Necessary Standard",d:"Only access, use, or disclose the minimum PHI necessary for the purpose. Don't pull entire patient records when only a specific field is needed. Applies to staff AND systems.",t:["HIPAA","access control","real-world"]},
+      {c:"Breach Definition (HIPAA)",d:"Acquisition, access, use, or disclosure of unsecured PHI that is not permitted and poses more than low probability of compromise. Triggered a 4-factor risk assessment, not automatic breach = notification.",t:["HIPAA","breach","real-world","critical"]},
+      {c:"Breach Risk Assessment",d:"Required to determine if a breach occurred. 4 factors: (1) nature/extent of PHI, (2) who accessed it, (3) whether PHI was acquired/viewed, (4) extent to which risk has been mitigated.",t:["HIPAA","breach","real-world","process"]},
+      {c:"60-Day Notification Rule",d:"CE must notify OCR and individuals within 60 days of DISCOVERING a breach — not when it occurred. A breach creates a specific compliance timeline to track.",t:["HIPAA","breach","real-world","critical"]},
+      {c:"HHS Breach Portal (Wall of Shame)",d:"Public database of HIPAA breaches affecting 500+ individuals at HHS.gov. Searchable by state, year, entity type. A breach would appear here if 500+ individuals affected.",t:["HIPAA","OCR","real-world"]},
+      {c:"HIPAA Administrative Safeguards",d:"Policies, procedures, training, risk analysis, contingency plan, access management, audit controls, workforce sanctions. These are the management/process controls in the Security Rule.",t:["HIPAA","safeguards","compliance","real-world"]},
+      {c:"HIPAA Physical Safeguards",d:"Facility access controls, workstation use policies, workstation security, device and media controls. Physical locks, screen privacy filters, clean desk, device encryption.",t:["HIPAA","physical","compliance"]},
+      {c:"HIPAA Technical Safeguards",d:"Access control (unique user IDs), audit controls (logging), integrity controls (hashing/checksums), transmission security (TLS). These map directly to security tools and configurations.",t:["HIPAA","technical","compliance","real-world"]},
+      {c:"OCR Penalty Tiers",d:"Tier 1 (no knowledge): $137–$68,928/violation. Tier 2 (reasonable cause): $1,379–$68,928. Tier 3 (willful neglect, corrected): $13,785–$68,928. Tier 4 (willful neglect, uncorrected): $68,928–$2,067,813.",t:["HIPAA","OCR","enforcement","real-world","critical"]},
+      {c:"Critical Access Hospital (CAH)",d:"Rural hospital ≤25 beds, ≥35 miles from nearest hospital. Cost-based Medicare reimbursement. A rural Critical Access Hospital qualifies as a CAH. CAH designation affects funding but NOT HIPAA obligations — same rules apply.",t:["healthcare","real-world","compliance"]},
+    ]
+  },
+  "17 – M365 & Azure Security": {
+    icon:"☁️", color:"#0078d4", type:"cards",
+    items:[
+      {c:"M365 Security Center",d:"security.microsoft.com — unified portal for Defender XDR, Secure Score, Incidents, Alerts, Email security, Identity. Your starting point for M365 security management.",t:["M365","portal","real-world"]},
+      {c:"Defender for Office 365",d:"Email and collaboration security. Plan 1: Safe Links, Safe Attachments, anti-phishing. Plan 2: adds attack simulation training, Threat Explorer, automated IR. Covers Exchange, SharePoint, Teams.",t:["M365","email","anti-phishing","real-world"]},
+      {c:"Safe Links",d:"Real-time URL scanning in emails and Office docs. Rewrites URLs and checks at click-time. Detonates in sandbox. Can be bypassed by direct IP delivery or URL encoding — not a silver bullet.",t:["M365","email","phishing","defense"]},
+      {c:"Safe Attachments",d:"Detonates email attachments in a virtual sandbox before delivery. Catches known and zero-day malware in attachments. Adds delivery delay. Enable for all users.",t:["M365","email","malware","defense"]},
+      {c:"Defender for Identity",d:"Monitors AD and Entra ID for attack patterns: Pass-the-Hash, Kerberoasting, reconnaissance, lateral movement. Uses AATP (Azure ATP) sensor on DC. Integrates with Defender XDR.",t:["M365","AD","identity","detection"]},
+      {c:"Microsoft Sentinel",d:"Cloud-native SIEM/SOAR. KQL for queries and detection rules. Analytics rules, workbooks, playbooks (Logic Apps). Data connectors for M365, Azure, on-prem, third-party. Pay-per-GB.",t:["SIEM","M365","KQL","cloud"]},
+      {c:"KQL (Kusto Query Language)",d:"Query language for Azure Data Explorer, Sentinel, and Defender Advanced Hunting. | where, | project, | summarize, | join. Learning KQL is high-value for blue team work in Microsoft environments.",t:["KQL","Sentinel","detection","M365"]},
+      {c:"Advanced Hunting (MDE)",d:"KQL-based threat hunting in Defender portal. Tables: DeviceProcessEvents, DeviceNetworkEvents, EmailEvents, IdentityLogonEvents. Write custom detections, hunt for IOCs, investigate incidents.",t:["M365","threat hunting","KQL","detection"]},
+      {c:"Conditional Access Policies",d:"Policy engine in Entra ID. IF (user + conditions) THEN (grant/block/require MFA/require compliant device). Key policies: require MFA from all locations, block legacy auth, require compliant device.",t:["Azure","identity","MFA","real-world","defense"]},
+      {c:"Entra ID Sign-in Logs",d:"Login telemetry in Azure AD. Location, device, app, result, MFA status, risk level. Search for: unfamiliar locations, impossible travel, legacy auth, token-only auth (AiTM indicator).",t:["Azure","logging","forensics","real-world","IR"]},
+      {c:"Legacy Authentication",d:"Older protocols (Basic Auth, SMTP AUTH, IMAP, POP3, EWS) that cannot support MFA. AiTM and credential spray attacks often use legacy auth. Block it via Conditional Access.",t:["M365","authentication","security","real-world","critical"]},
+      {c:"Microsoft Purview DLP",d:"Data Loss Prevention. Policies scan email, SharePoint, OneDrive, Teams for sensitive data patterns (SSN, credit card, PHI keywords). Alert or block. Required for HIPAA technical safeguards.",t:["M365","DLP","compliance","HIPAA","real-world"]},
+      {c:"Microsoft Secure Score",d:"Posture metric 0-100%. Each recommendation has a point value and implementation guidance. Use as a roadmap. Don't game the score — prioritize meaningful controls.",t:["M365","posture","hardening"]},
+    ]
+  },
+  "18 – Threat Intelligence": {
+    icon:"🕵️", color:"#c9d1d9", type:"cards",
+    items:[
+      {c:"Threat Intelligence (TI)",d:"Analyzed information about adversaries — who, what, why, how. Strategic TI (for leadership, long-term). Operational TI (for specific campaigns). Tactical TI (IOCs for immediate blocking).",t:["TI","definitions","process"]},
+      {c:"IOC Types",d:"IP addresses (C2 servers), domain names (phishing), file hashes (malware), URLs (phishing/C2), email addresses, registry keys, mutex names, SSL certificate hashes. Add to SIEM and EDR after incidents.",t:["IOC","detection","real-world"]},
+      {c:"MITRE ATT&CK Tactics",d:"14 tactic categories: Reconnaissance, Resource Development, Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion, Credential Access, Discovery, Lateral Movement, Collection, C2, Exfiltration, Impact.",t:["ATT&CK","TTPs","framework"]},
+      {c:"TTP (Tactics, Techniques, Procedures)",d:"Behavioral description of how attackers operate. More durable than IOCs (IPs change, TTPs don't). Map incidents to ATT&CK TTPs for documentation and detection improvement.",t:["ATT&CK","threat modeling","detection"]},
+      {c:"Threat Actor Categories",d:"Nation-state (APT, long-term, espionage). Cybercriminal (eCrime, financial motivation, ransomware). Hacktivist (ideological, DDoS, defacement). Insider (access, motivation varies).",t:["threat actors","categories","TI"]},
+      {c:"Diamond Model",d:"Adversary ↔ Capability ↔ Infrastructure ↔ Victim. Four features connected by relationships. Meta-features: timestamp, phase, result, direction, methodology, resources. Useful for structuring incident analysis.",t:["TI","IR","model"]},
+      {c:"Cyber Kill Chain",d:"7 stages Lockheed Martin model: Recon, Weaponize, Deliver, Exploit, Install, C2, Actions. Defender goal: detect and break the chain as early as possible (ideally Deliver or earlier).",t:["ATT&CK","model","framework","real-world"]},
+      {c:"STIX / TAXII",d:"STIX = Structured Threat Intelligence eXpression (JSON format for TI data). TAXII = Trusted Automated eXchange of Intelligence Information (transport protocol). Enables automated IOC sharing.",t:["TI","standards","automation"]},
+      {c:"Threat Intelligence Feeds",d:"Sources of IOCs and TI. Free: AlienVault OTX, MISP, Abuse.ch, VirusTotal. Commercial: CrowdStrike Intel, Recorded Future, Mandiant. Your MSSP should provide a feed — evaluate their quality.",t:["TI","feeds","real-world"]},
+      {c:"OSINT",d:"Open Source Intelligence. Public information gathering: WHOIS, Shodan, Censys, LinkedIn, job postings, DNS records, certificate transparency, GitHub, Pastebin, dark web (carefully). Free threat intel source.",t:["TI","recon","tools"]},
+      {c:"CVE vs CWE vs CPE",d:"CVE = specific vulnerability instance (CVE-2021-44228). CWE = weakness type/category (CWE-89 = SQL Injection). CPE = product identifier for matching vulns to software versions.",t:["vulnerability","standards","definitions"]},
+      {c:"Indicators of Attack (IOA)",d:"Behavioral patterns indicating an attack in progress — regardless of specific tools used. Unlike IOCs (what was used), IOAs focus on what the attacker is trying to DO. Harder to evade.",t:["detection","behavioral","EDR"]},
+    ]
+  },
+  "19 – DFIR": {
+    icon:"🔬", color:"#58a6ff", type:"cards",
+    items:[
+      {c:"DFIR",d:"Digital Forensics and Incident Response. Digital forensics = collecting and analyzing evidence. Incident response = containing and recovering from security incidents. Both require documentation.",t:["DFIR","definitions"]},
+      {c:"Order of Volatility",d:"Collect most volatile evidence first: CPU registers/cache → RAM (running processes, network state) → Swap/virtual memory → Running processes → Network connections → Disk image → Remote logging.",t:["DFIR","evidence","forensics","critical"]},
+      {c:"Memory Acquisition",d:"Tools: WinPmem, Magnet RAM Capture, DumpIt (Windows). LiME (Linux kernel module). Acquire before rebooting or isolating. Memory contains running processes, network connections, encryption keys, credentials.",t:["DFIR","memory","tools"]},
+      {c:"Disk Imaging",d:"Create forensic copy of storage. Tools: FTK Imager, dd (Linux), Guymager. Always use hardware write-blockers. Verify with hash (MD5/SHA256) of original and copy — must match. Never work on original.",t:["DFIR","disk","evidence","tools"]},
+      {c:"Windows Forensic Artifacts",d:"Prefetch (execution evidence), Amcache.hve (installed software), ShimCache (AppCompatCache), Jump Lists (recent files), LNK files (shortcut metadata), Thumbcache, Browser artifacts, $MFT.",t:["DFIR","Windows","artifacts"]},
+      {c:"Linux Forensic Artifacts",d:"/var/log/auth.log, /var/log/syslog, /etc/passwd, /etc/shadow, /home/user/.bash_history, /tmp and /dev/shm (malware staging), /etc/crontab, /etc/rc.local, systemd unit files.",t:["DFIR","Linux","artifacts"]},
+      {c:"Registry Forensics",d:"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run (user persistence). HKLM\\System\\CurrentControlSet\\Services (services). HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\KnownDLLs. SAM hive contains local account hashes.",t:["DFIR","Windows","registry","forensics"]},
+      {c:"Timeline Analysis",d:"Reconstruct attack sequence from multiple artifact sources. Tools: log2timeline/Plasothe supervisoresketch, Autopsy. Correlate: file creation/modification times, event log timestamps, browser history, SIEM logs.",t:["DFIR","timeline","tools"]},
+      {c:"Network Forensics",d:"Analyze packet captures (Wireshark, tcpdump), NetFlow data, firewall logs, DNS logs (Zeek dns.log), proxy logs. Look for: C2 beaconing patterns, data exfiltration, lateral movement traffic.",t:["DFIR","network","Zeek","real-world"]},
+      {c:"Anti-Forensics",d:"Attacker techniques to hinder investigation: log clearing (Event ID 1102), timestomping (modifying file timestamps), data wiping, steganography, encrypted C2, living-off-the-land (no malware on disk).",t:["DFIR","evasion","detection"]},
+      {c:"Forensic Hashing",d:"MD5 and SHA-256 of evidence files. Hash at collection, verify at every analysis step. Chain of custody requires hash values to prove no tampering. md5sum/sha256sum on Linux, CertUtil on Windows.",t:["DFIR","evidence","integrity","real-world"]},
+      {c:"Legal Hold",d:"When litigation or investigation is anticipated, preserve all potentially relevant data. Stop normal deletion processes. Applies to email, files, logs. HIPAA OCR investigations trigger this.",t:["DFIR","legal","compliance","real-world"]},
+    ]
+  },
+  "20 – PowerShell Security": {
+    icon:"💙", color:"#2196F3", type:"cards",
+    items:[
+      {c:"Get-WinEvent (Security)",d:"Get-WinEvent -LogName Security -FilterHashtable @{Id=4625} | Select TimeCreated, Message — failed logons. More powerful than Get-EventLog. Use for SIEM-style queries on endpoints.",t:["PowerShell","logging","IR","real-world"]},
+      {c:"Get-Process / Get-Service",d:"Get-Process | Sort-Object CPU -Desc — top CPU consumers. Get-Service | Where-Object {$_.Status -eq 'Running'} — running services. Look for unexpected processes/services during IR.",t:["PowerShell","monitoring","IR"]},
+      {c:"Get-NetTCPConnection",d:"Get-NetTCPConnection | Where-Object {$_.State -eq 'Established'} — active connections with PIDs. Correlate PID to process: Get-Process -Id (Get-NetTCPConnection).OwningProcess",t:["PowerShell","network","IR","threat hunting"]},
+      {c:"Get-ADUser / AD Module",d:"Get-ADUser -Filter * -Properties LastLogonDate | Sort LastLogonDate — find stale accounts. Get-ADGroupMember 'Domain Admins' — admin enumeration. Requires RSAT AD module.",t:["PowerShell","AD","IAM","real-world"]},
+      {c:"Scheduled Task Enumeration",d:"Get-ScheduledTask | Where-Object {$_.State -ne 'Disabled'} — all enabled tasks. Get-ScheduledTaskInfo shows last run time. Check Actions for suspicious binaries or encoded commands.",t:["PowerShell","persistence","threat hunting","IR"]},
+      {c:"Invoke-Command (Remote)",d:"Invoke-Command -ComputerName SERVER01 -ScriptBlock {Get-Process} — remote execution. Requires WinRM (port 5985/5986). Used for legitimate remote admin and lateral movement by attackers. Log with Event ID 4688.",t:["PowerShell","remote","WinRM","IR"]},
+      {c:"Find Encoded Commands",d:"Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' | Where {$_.Message -like '*-EncodedCommand*'} — find obfuscated PS execution. Common attacker technique.",t:["PowerShell","detection","threat hunting","obfuscation"]},
+      {c:"Check Local Admin Group",d:"Get-LocalGroupMember -Group Administrators — who has local admin? Run on all endpoints via Kaseya/RMM to find unexpected admins. Compare against expected baseline.",t:["PowerShell","IAM","hardening","real-world"]},
+      {c:"Startup Persistence Locations",d:"Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run — machine startup. HKCU:\\...\\Run — user startup. Get-CimInstance Win32_StartupCommand — all startup items.",t:["PowerShell","persistence","forensics","threat hunting"]},
+      {c:"Find Large Files / Recent Changes",d:"Get-ChildItem C:\\ -Recurse -ErrorAction SilentlyContinue | Where-Object {$_.LastWriteTime -gt (Get-Date).AddDays(-1)} — files changed in last 24h. Useful post-incident.",t:["PowerShell","forensics","IR"]},
+    ]
+  },
+};
+
+// Table sections
+const TABLE_SECTIONS = {
+  "21 – Windows Event IDs": {
+    icon:"📋", color:"#58a6ff",
+    cols:["Event ID","Category","Severity","Description","Security Notes"],
+    rows:[
+      ["1102","Audit Log","🔴 High","Audit log cleared","Attacker covering tracks. Investigate immediately."],
+      ["4624","Logon","🟢 Low","Successful logon","Baseline. High volume is normal. Focus on Type 10 (RDP), Type 3 (network), unusual hours."],
+      ["4625","Logon","🟡 Med","Failed logon","Multiple in short window = brute force/spray. Sub-status 0xC000006A = bad password, 0xC0000064 = bad username."],
+      ["4634","Logon","🟢 Low","Logoff","Correlate with 4624 to determine session duration."],
+      ["4647","Logon","🟢 Low","User initiated logoff","User-initiated vs. session timeout."],
+      ["4648","Logon","🟡 Med","Logon with explicit credentials","RunAs or network logon with alternate creds. Lateral movement indicator."],
+      ["4657","Registry","🟡 Med","Registry value modified","Track changes to Run keys, security settings. Requires Object Access auditing."],
+      ["4663","Object Access","🟡 Med","Access attempted on object","File/folder/registry access. Very noisy — filter by sensitive paths."],
+      ["4672","Logon","🟡 Med","Special privileges assigned","Admin-equivalent rights at logon. Every admin logon triggers this."],
+      ["4688","Process","🔴 High","New process created","With command line logging: gold for threat hunting. Requires Audit Process Creation GPO."],
+      ["4697","Services","🔴 High","Service installed in system","Attackers install malicious services for persistence."],
+      ["4698","Sched Tasks","🔴 High","Scheduled task created","Common persistence mechanism. Check task action for suspicious binaries."],
+      ["4700","Sched Tasks","🟡 Med","Scheduled task enabled","Previously disabled task was enabled — investigate why."],
+      ["4702","Sched Tasks","🟡 Med","Scheduled task updated","Modification of existing task. Could indicate tampering."],
+      ["4719","Policy","🔴 High","Audit policy changed","Attacker disabling logging. Critical — investigate immediately."],
+      ["4720","Account","🟡 Med","User account created","New account creation. Verify with HR if unexpected."],
+      ["4722","Account","🟡 Med","User account enabled","Re-enabled account. Could be compromised dormant account activation."],
+      ["4724","Account","🟡 Med","Password reset attempt","Admin password reset for another user. Verify legitimacy."],
+      ["4725","Account","🟢 Low","User account disabled","Normal offboarding. Alert if unexpected."],
+      ["4726","Account","🟡 Med","User account deleted","Verify against offboarding process."],
+      ["4728","Groups","🟡 Med","User added to global security group","Track additions to privileged groups (Domain Admins, etc.)."],
+      ["4732","Groups","🟡 Med","User added to local security group","Addition to local Administrators group is high-value alert."],
+      ["4738","Account","🟡 Med","User account changed","Password reset, account options modified. Verify legitimacy."],
+      ["4740","Account","🔴 High","User account locked out","Multiple failed attempts. Source workstation field helps find attacker source."],
+      ["4756","Groups","🟡 Med","User added to universal security group","Track privileged universal group membership changes."],
+      ["4768","Kerberos","🟢 Low","Kerberos TGT requested (AS-REQ)","Normal auth. Look for encryption type DES/RC4 (legacy/weak). Failure code 0x6 = bad username."],
+      ["4769","Kerberos","🟡 Med","Kerberos service ticket requested","High volume of RC4 encrypted requests from one account = Kerberoasting attack."],
+      ["4771","Kerberos","🟡 Med","Kerberos pre-auth failed","Similar to 4625 but Kerberos-specific. 0x18 = bad password, 0x6 = bad username."],
+      ["4776","NTLM","🟡 Med","NTLM credential validation","NTLM auth attempt. Failure with error code = brute force. Should be rare if Kerberos is working."],
+      ["4798","Enumeration","🔴 High","User local group membership enumerated","Recon activity — attacker mapping what groups a user is in."],
+      ["4799","Enumeration","🔴 High","Security group membership enumerated","Recon activity. Querying who is in a group."],
+      ["5140","Network","🟡 Med","Network share accessed","File share access. Monitor access to sensitive shares."],
+      ["7034","Services","🟡 Med","Service crashed unexpectedly","Could indicate exploitation attempt crashing a service."],
+      ["7045","Services","🔴 High","New service installed","Second highest priority after 1102. Most malware installs as a service."],
+      ["4104","PowerShell","🔴 High","PowerShell script block logged","Requires Script Block Logging GPO. Captures all PS scripts including de-obfuscated content."],
+    ]
+  },
+  "22 – Common Ports": {
+    icon:"🔌", color:"#ffa657",
+    cols:["Port","Protocol","Service","Description","Security Notes"],
+    rows:[
+      ["20","TCP","FTP-DATA","FTP data transfer","Unencrypted. Use SFTP (22) or FTPS (990) instead. Block inbound."],
+      ["21","TCP","FTP","FTP control","Unencrypted. Anonymous FTP is dangerous. Use SFTP. Common attack target."],
+      ["22","TCP","SSH","Secure Shell remote access","Encrypted. Disable root login, use key auth. Change default port (optional). Brute-forced constantly."],
+      ["23","TCP","Telnet","Unencrypted remote terminal","NEVER use. Sends everything in plaintext. Block everywhere."],
+      ["25","TCP","SMTP","Email transfer between servers","Relay. Should not accept from internet without auth (open relay). SPF/DKIM/DMARC required."],
+      ["53","TCP/UDP","DNS","Domain Name System","Critical service. UDP for queries, TCP for zone transfers. DNS poisoning redirects traffic. Block zone transfers externally."],
+      ["67","UDP","DHCP-SERVER","DHCP server","DHCP snooping prevents rogue DHCP attacks. Trusted ports only."],
+      ["68","UDP","DHCP-CLIENT","DHCP client","—"],
+      ["69","UDP","TFTP","Trivial File Transfer Protocol","Unauthenticated, unencrypted. Only on isolated networks. Network device firmware updates."],
+      ["80","TCP","HTTP","Unencrypted web traffic","Redirect all to 443/HTTPS. Never serve sensitive data over HTTP."],
+      ["88","TCP/UDP","Kerberos","Kerberos authentication","AD authentication. Should only be reachable by domain members and DCs."],
+      ["110","TCP","POP3","Email retrieval (legacy)","Unencrypted. Use POP3S (995). Legacy auth — block via Conditional Access in M365."],
+      ["119","TCP","NNTP","Network News Transfer","Legacy. Block if not needed."],
+      ["123","UDP","NTP","Network Time Protocol","Time synchronization. Kerberos fails if time is off >5 mins. NTP amplification DDoS attacks."],
+      ["135","TCP","RPC/DCOM","Microsoft RPC","Required for AD/Windows. Restrict from internet. DCOM attacks (PrintSpooler, etc.)."],
+      ["137-139","TCP/UDP","NetBIOS","NetBIOS services","Legacy Windows. Disable if possible. NBT-NS poisoning attack. Block at perimeter."],
+      ["143","TCP","IMAP","Email retrieval","Unencrypted. Use IMAPS (993). Legacy auth — block in M365 via Conditional Access."],
+      ["161","UDP","SNMP","Network device management","SNMPv1/v2c = community string auth (default 'public'). Use SNMPv3 with auth+encryption."],
+      ["389","TCP","LDAP","Directory services","AD queries. Unencrypted. Use LDAPS (636). LDAP injection attacks."],
+      ["443","TCP","HTTPS","Encrypted web traffic","TLS 1.2+ only. Check cipher suites (no RC4, DES). Certificate pinning for sensitive apps."],
+      ["445","TCP","SMB","Windows file sharing","SMBv1 = EternalBlue/WannaCry. Disable SMBv1 IMMEDIATELY. Block at perimeter always."],
+      ["465","TCP","SMTPS","SMTP over SSL (legacy)","Deprecated in favor of port 587 + STARTTLS. Legacy mail clients."],
+      ["500","UDP","IKE","IPsec key exchange","VPN. IKEv2 is preferred over IKEv1. Legitimate VPN traffic."],
+      ["514","UDP","Syslog","System log forwarding","Unencrypted. Use TLS syslog (port 6514). Central logging infrastructure."],
+      ["587","TCP","SMTP Submission","Authenticated email submission","Auth required. Standard for email clients sending to server. SPF/DKIM/DMARC."],
+      ["636","TCP","LDAPS","LDAP over SSL/TLS","Encrypted AD queries. Use this, not 389. Requires valid certificate on DC."],
+      ["993","TCP","IMAPS","IMAP over SSL","Encrypted email retrieval. Still legacy auth risk in M365 — block via CA."],
+      ["995","TCP","POP3S","POP3 over SSL","Encrypted email retrieval."],
+      ["1433","TCP","MSSQL","Microsoft SQL Server","Default port. Change in production. Restrict to app servers only. SQL injection target."],
+      ["1521","TCP","Oracle","Oracle DB listener","Change default port. Restrict access. Oracle TNS attacks."],
+      ["3306","TCP","MySQL","MySQL database","Change default port. Never expose to internet. Bind to localhost or specific IPs."],
+      ["3389","TCP","RDP","Remote Desktop Protocol","High-value attack target. BlueKeep (CVE-2019-0708). Restrict to VPN/Jump server. Enable NLA. Log all sessions."],
+      ["4444","TCP","Metasploit","Metasploit default listener","Default reverse shell port. Alert on any traffic to/from this port."],
+      ["5060","TCP/UDP","SIP","VoIP signaling","SIP attacks: registration hijack, toll fraud. TLS-SIP (SIPS) is 5061."],
+      ["5985","TCP","WinRM-HTTP","Windows Remote Management HTTP","PowerShell Remoting. Restrict to admin jump hosts. Used by attackers for lateral movement."],
+      ["5986","TCP","WinRM-HTTPS","Windows Remote Management HTTPS","Encrypted WinRM. Prefer over 5985. Requires certificate."],
+      ["6379","TCP","Redis","Redis key-value store","No auth by default. Never expose to internet. Lateral movement pivot if accessible."],
+      ["8080","TCP","HTTP-ALT","Alternative HTTP","Often dev/staging servers. Scan for exposures."],
+      ["8443","TCP","HTTPS-ALT","Alternative HTTPS","Alternative SSL port. Common for admin panels. Restrict access."],
+      ["27017","TCP","MongoDB","MongoDB database","No auth by default (older versions). Never expose to internet. Countless breaches from exposed MongoDB."],
+    ]
+  }
+};
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let currentView = 'home';
+let currentSection = null;
+let realWorldFilter = false;
+let bookmarks = JSON.parse(localStorage.getItem('ckb_bookmarks') || '[]');
+let quizItems = [];
+let quizIndex = 0;
+let themeMode = localStorage.getItem('ckb_theme') || 'dark';
+
+// Apply saved theme
+document.documentElement.setAttribute('data-theme', themeMode);
+document.getElementById('btn-theme').textContent = themeMode === 'dark' ? '☀️ Light' : '🌙 Dark';
+
+// ════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function bmKey(section, concept){ return section + '|||' + concept; }
+function isBm(section, concept){ return bookmarks.includes(bmKey(section, concept)); }
+function saveBm(){ localStorage.setItem('ckb_bookmarks', JSON.stringify(bookmarks)); }
+function totalTerms(){ return Object.values(SECTIONS).reduce((a,s)=>a+s.items.length,0) + Object.values(TABLE_SECTIONS).reduce((a,s)=>a+s.rows.length,0); }
+
+function buildCard(item, section, color, showSection=false){
+  const key = bmKey(section, item.c);
+  const starred = isBm(section, item.c);
+  const hasRW = item.t && item.t.includes('real-world');
+  const hasCrit = item.t && item.t.includes('critical');
+  const tags = (item.t||[]).map(t=>{
+    let cls = 'tag';
+    if(t==='real-world') cls+=' real-world';
+    else if(t==='critical') cls+=' critical';
+    return `<span class="${cls}">${esc(t)}</span>`;
+  }).join('');
+  const secLabel = showSection ? `<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:4px;">${esc(section)}</div>` : '';
+  return `<div class="card" style="--ca:${color}" onclick="toggleCard(this)">
+    ${secLabel}
+    <div class="card-top">
+      <div class="card-concept">${esc(item.c)}</div>
+      <div class="card-actions">
+        <span class="card-bm ${starred?'starred':''}" title="Bookmark" onclick="event.stopPropagation();toggleBm(this,'${esc(key.replace(/'/g,"&#39;"))}','${esc(section.replace(/'/g,"&#39;"))}','${esc(item.c.replace(/'/g,"&#39;"))}')"></span>
+        <span class="card-toggle">›</span>
+      </div>
+    </div>
+    <div class="card-preview">${esc(item.d)}</div>
+    <div class="card-def">${esc(item.d)}</div>
+    <div class="card-tags">${tags}</div>
+  </div>`;
+}
+
+function toggleCard(card){ card.classList.toggle('expanded'); }
+
+function toggleBm(el, key, section, concept){
+  if(bookmarks.includes(key)){
+    bookmarks = bookmarks.filter(k=>k!==key);
+    el.classList.remove('starred');
+  } else {
+    bookmarks.push(key);
+    el.classList.add('starred');
+  }
+  saveBm();
+  updateBmCount();
+}
+
+function updateBmCount(){
+  const el = document.getElementById('bm-count');
+  if(el) el.textContent = bookmarks.length;
+}
+
+function highlight(text, q){
+  if(!q) return esc(text);
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return esc(text).replace(re,'<mark>$1</mark>');
+}
+
+// ════════════════════════════════════════════════
+// NAVIGATION BUILD
+// ════════════════════════════════════════════════
+function buildNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+
+  // Home
+  const homeGrp = document.createElement('div');
+  homeGrp.className = 'nav-group';
+  homeGrp.innerHTML = `
+    <div class="nav-group-label">Navigation</div>
+    <div class="nav-item" id="nav-home" onclick="showHome()"><span class="ni-icon">🏠</span><span class="ni-name">Home</span></div>
+    <div class="nav-item" id="nav-bookmarks" onclick="showBookmarks()"><span class="ni-icon">★</span><span class="ni-name">Bookmarks</span><span class="ni-count" id="bm-count">${bookmarks.length}</span></div>
+  `;
+  nav.appendChild(homeGrp);
+
+  // Card sections
+  const cardGrp = document.createElement('div');
+  cardGrp.className = 'nav-group';
+  cardGrp.innerHTML = '<div class="nav-group-label">Concepts</div>';
+  Object.entries(SECTIONS).forEach(([name, sec]) => {
+    const div = document.createElement('div');
+    div.className = 'nav-item';
+    div.id = 'nav-' + name;
+    div.onclick = () => showSection(name);
+    div.innerHTML = `<span class="ni-icon">${sec.icon}</span><span class="ni-name">${name}</span><span class="ni-count">${sec.items.length}</span>`;
+    cardGrp.appendChild(div);
+  });
+  nav.appendChild(cardGrp);
+
+  // Table sections
+  const tblGrp = document.createElement('div');
+  tblGrp.className = 'nav-group';
+  tblGrp.innerHTML = '<div class="nav-group-label">Reference Tables</div>';
+  Object.entries(TABLE_SECTIONS).forEach(([name, sec]) => {
+    const div = document.createElement('div');
+    div.className = 'nav-item';
+    div.id = 'nav-' + name;
+    div.onclick = () => showTableSection(name);
+    div.innerHTML = `<span class="ni-icon">${sec.icon}</span><span class="ni-name">${name}</span><span class="ni-count">${sec.rows.length}</span>`;
+    tblGrp.appendChild(div);
+  });
+  nav.appendChild(tblGrp);
+}
+
+function setActive(id){
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('nav-' + id);
+  if(el) el.classList.add('active');
+}
+
+function setViews(active){
+  document.getElementById('home-view').style.display = active==='home'?'block':'none';
+  document.getElementById('section-view').style.display = active==='section'?'block':'none';
+  document.getElementById('search-results').style.display = active==='search'?'block':'none';
+  document.getElementById('bookmarks-view').style.display = active==='bookmarks'?'block':'none';
+}
+
+// ════════════════════════════════════════════════
+// HOME
+// ════════════════════════════════════════════════
+function buildHome(){
+  const grid = document.getElementById('home-grid');
+  grid.innerHTML = '';
+  [...Object.entries(SECTIONS), ...Object.entries(TABLE_SECTIONS)].forEach(([name, sec]) => {
+    const count = sec.items ? sec.items.length : sec.rows.length;
+    const parts = name.split(' – ');
+    const div = document.createElement('div');
+    div.className = 'sc';
+    div.style.setProperty('--sc-color', sec.color);
+    div.innerHTML = `<div class="s-num">${sec.icon} ${parts[0]}</div><div class="s-name">${parts[1]||name}</div><div class="s-count">${count} ${sec.items?'concepts':'entries'}</div>`;
+    div.onclick = () => sec.items ? showSection(name) : showTableSection(name);
+    grid.appendChild(div);
+  });
+}
+
+function showHome(){
+  setViews('home');
+  setActive('home');
+  document.getElementById('bc-cur').textContent = 'Home';
+  document.getElementById('search').value = '';
+  realWorldFilter = false;
+  document.getElementById('btn-rw').classList.remove('active');
+  currentView = 'home';
+}
+
+// ════════════════════════════════════════════════
+// CARD SECTIONS
+// ════════════════════════════════════════════════
+function showSection(name, rwFilter=null){
+  const sec = SECTIONS[name];
+  if(!sec) return;
+  currentSection = name;
+  currentView = 'section';
+  if(rwFilter !== null) realWorldFilter = rwFilter;
+
+  setViews('section');
+  setActive(name);
+  document.getElementById('bc-cur').textContent = name;
+  document.getElementById('search').value = '';
+
+  const parts = name.split(' – ');
+  document.getElementById('sec-hero').innerHTML = `
+    <div class="sec-num" style="color:${sec.color}">${sec.icon} ${name}</div>
+    <h2>${parts[1]||name}</h2>
+    <div class="sec-meta">
+      <span>${sec.items.length} concepts</span>
+      <span>·</span>
+      <span>Click any card to expand</span>
+    </div>
+  `;
+
+  const controls = document.getElementById('sec-controls');
+  controls.innerHTML = `
+    <button class="sec-btn" onclick="expandAll()">Expand All</button>
+    <button class="sec-btn" onclick="collapseAll()">Collapse All</button>
+    ${realWorldFilter ? `<button class="sec-btn" style="border-color:var(--accent2);color:var(--accent2)" onclick="showSection('${name.replace(/'/g,"\\'")}',false)">✕ Clear Filter</button>` : ''}
+  `;
+
+  renderCards(sec, name);
+  window.scrollTo(0,0);
+}
+
+function renderCards(sec, name){
+  const grid = document.getElementById('cards-grid');
+  let items = sec.items;
+  if(realWorldFilter) items = items.filter(i => i.t && i.t.includes('real-world'));
+  if(items.length === 0){
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:12px;">No real-world tagged items in this section.</div>`;
+    return;
+  }
+  grid.innerHTML = items.map(item => buildCard(item, name, sec.color)).join('');
+}
+
+function expandAll(){ document.querySelectorAll('#cards-grid .card').forEach(c=>c.classList.add('expanded')); }
+function collapseAll(){ document.querySelectorAll('#cards-grid .card').forEach(c=>c.classList.remove('expanded')); }
+
+// ════════════════════════════════════════════════
+// TABLE SECTIONS
+// ════════════════════════════════════════════════
+function showTableSection(name){
+  const sec = TABLE_SECTIONS[name];
+  if(!sec) return;
+  currentView = 'table';
+  currentSection = name;
+
+  setViews('section');
+  setActive(name);
+  document.getElementById('bc-cur').textContent = name;
+  document.getElementById('search').value = '';
+
+  const parts = name.split(' – ');
+  document.getElementById('sec-hero').innerHTML = `
+    <div class="sec-num" style="color:${sec.color}">${sec.icon} ${name}</div>
+    <h2>${parts[1]||name}</h2>
+    <div class="sec-meta"><span>${sec.rows.length} entries</span><span>·</span><span>Use the table search to filter</span></div>
+  `;
+  document.getElementById('sec-controls').innerHTML = '';
+
+  const grid = document.getElementById('cards-grid');
+  const tableId = 'tbl-' + name.replace(/\s/g,'_');
+  grid.style.display = 'block';
+  grid.innerHTML = `
+    <input class="tbl-search" id="${tableId}-search" placeholder="Filter table..." autocomplete="off" oninput="filterTable('${tableId}')">
+    <div class="tbl-wrap"><table class="ref-table" id="${tableId}">
+      <thead><tr>${sec.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead>
+      <tbody id="${tableId}-body">${renderTableRows(sec.rows, sec)}</tbody>
+    </table></div>
+  `;
+  window.scrollTo(0,0);
+}
+
+function renderTableRows(rows, sec){
+  return rows.map(row => {
+    const cells = row.map((cell, i) => {
+      let cls = '';
+      if(i===2){ // severity column
+        if(cell.includes('High')) cls=' class="crit-high"';
+        else if(cell.includes('Med')) cls=' class="crit-med"';
+        else if(cell.includes('Low')) cls=' class="crit-low"';
+      }
+      return `<td${cls}>${esc(cell)}</td>`;
+    }).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+}
+
+function filterTable(tableId){
+  const q = document.getElementById(tableId+'-search').value.toLowerCase();
+  const tbody = document.getElementById(tableId+'-body');
+  const name = currentSection;
+  const sec = TABLE_SECTIONS[name];
+  if(!sec) return;
+  const filtered = q ? sec.rows.filter(row => row.some(cell => cell.toLowerCase().includes(q))) : sec.rows;
+  tbody.innerHTML = renderTableRows(filtered, sec);
+}
+
+// Override grid display for table sections
+const origGridDisplay = document.getElementById('cards-grid').style.display;
+
+// ════════════════════════════════════════════════
+// SEARCH
+// ════════════════════════════════════════════════
+document.getElementById('search').addEventListener('input', function(e){
+  const q = e.target.value.trim();
+  if(!q){ showHome(); return; }
+  doSearch(q);
+});
+
+function doSearch(q){
+  const ql = q.toLowerCase();
+  let results = {};
+  let total = 0;
+
+  Object.entries(SECTIONS).forEach(([name, sec]) => {
+    sec.items.forEach(item => {
+      if(item.c.toLowerCase().includes(ql) || item.d.toLowerCase().includes(ql) || (item.t||[]).some(t=>t.toLowerCase().includes(ql))){
+        if(!results[name]) results[name] = {type:'cards', color:sec.color, icon:sec.icon, items:[]};
+        results[name].items.push(item);
+        total++;
+      }
+    });
+  });
+  Object.entries(TABLE_SECTIONS).forEach(([name, sec]) => {
+    sec.rows.forEach(row => {
+      if(row.some(cell=>cell.toLowerCase().includes(ql))){
+        if(!results[name]) results[name] = {type:'table', color:sec.color, icon:sec.icon, items:[]};
+        results[name].items.push(row);
+        total++;
+      }
+    });
+  });
+
+  setViews('search');
+  document.getElementById('bc-cur').textContent = `"${q}"`;
+  currentView = 'search';
+
+  const sr = document.getElementById('search-results');
+  if(total===0){
+    sr.innerHTML=`<div class="empty-state"><div class="es-icon">🔍</div><p>No results for "<strong>${esc(q)}</strong>"<br>Try a shorter term or different keyword.</p></div>`;
+    return;
+  }
+
+  let html = `<div class="sr-header"><span>${total}</span> result${total!==1?'s':''} for "<strong>${esc(q)}</strong>"</div>`;
+  Object.entries(results).forEach(([name, res]) => {
+    html += `<div class="sr-section-label" style="color:${res.color}">${res.icon} ${esc(name)}</div>`;
+    if(res.type==='cards'){
+      html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-bottom:16px;">`;
+      res.items.forEach(item => {
+        const key = bmKey(name, item.c);
+        const starred = isBm(name, item.c);
+        const tags = (item.t||[]).map(t=>`<span class="tag ${t==='real-world'?'real-world':t==='critical'?'critical':''}">${esc(t)}</span>`).join('');
+        html += `<div class="card" style="--ca:${res.color}" onclick="this.classList.toggle('expanded')">
+          <div class="card-top"><div class="card-concept">${highlight(item.c,q)}</div>
+          <div class="card-actions"><span class="card-bm ${starred?'starred':''}" onclick="event.stopPropagation();toggleBm(this,'${esc(key)}','${esc(name)}','${esc(item.c)}')"></span><span class="card-toggle">›</span></div></div>
+          <div class="card-preview">${highlight(item.d,q)}</div>
+          <div class="card-def">${highlight(item.d,q)}</div>
+          <div class="card-tags">${tags}</div></div>`;
+      });
+      html += `</div>`;
+    } else {
+      const sec = TABLE_SECTIONS[name];
+      html += `<div class="tbl-wrap" style="margin-bottom:16px;"><table class="ref-table"><thead><tr>${sec.cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+      res.items.forEach(row => {
+        html += `<tr>${row.map((cell,i)=>{
+          let cls=''; if(i===2){if(cell.includes('High'))cls=' class="crit-high"'; else if(cell.includes('Med'))cls=' class="crit-med"'; else if(cell.includes('Low'))cls=' class="crit-low"';}
+          return `<td${cls}>${highlight(cell,q)}</td>`;
+        }).join('')}</tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
+  });
+  sr.innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+// ════════════════════════════════════════════════
+// BOOKMARKS
+// ════════════════════════════════════════════════
+function showBookmarks(){
+  setViews('bookmarks');
+  setActive('bookmarks');
+  document.getElementById('bc-cur').textContent = 'Bookmarks';
+  currentView = 'bookmarks';
+
+  const grid = document.getElementById('bm-grid');
+  if(bookmarks.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">☆</div><p>No bookmarks yet.<br>Click the ☆ on any card to save it here.</p></div>`;
+    return;
+  }
+  let html = '';
+  bookmarks.forEach(key => {
+    const [section, concept] = key.split('|||');
+    const sec = SECTIONS[section];
+    if(!sec) return;
+    const item = sec.items.find(i=>i.c===concept);
+    if(!item) return;
+    html += buildCard(item, section, sec.color, true);
+  });
+  grid.innerHTML = html || `<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">☆</div><p>Bookmarked items not found.<br>They may have been removed.</p></div>`;
+}
+
+// ════════════════════════════════════════════════
+// REAL-WORLD FILTER
+// ════════════════════════════════════════════════
+function toggleRealWorld(){
+  realWorldFilter = !realWorldFilter;
+  document.getElementById('btn-rw').classList.toggle('active', realWorldFilter);
+  if(currentView==='section' && currentSection && SECTIONS[currentSection]){
+    showSection(currentSection, realWorldFilter);
+  } else if(!currentSection || currentView==='home'){
+    // Show all real-world items across all sections
+    if(realWorldFilter) showAllRealWorld();
+    else showHome();
+  }
+}
+
+function showAllRealWorld(){
+  setViews('section');
+  document.getElementById('bc-cur').textContent = 'Real-World Items';
+  document.getElementById('sec-hero').innerHTML = `
+    <div class="sec-num" style="color:var(--accent2)">🏥 REAL-WORLD FILTER</div>
+    <h2>Real-World Tagged Concepts</h2>
+    <div class="sec-meta">Items tied to actual work experience tied to real-world work experience or home lab</div>
+  `;
+  document.getElementById('sec-controls').innerHTML = `<button class="sec-btn" onclick="expandAll()">Expand All</button><button class="sec-btn" onclick="collapseAll()">Collapse All</button>`;
+  const grid = document.getElementById('cards-grid');
+  grid.style.display = '';
+  let html = '';
+  Object.entries(SECTIONS).forEach(([name, sec]) => {
+    const rwItems = sec.items.filter(i => i.t && i.t.includes('real-world'));
+    rwItems.forEach(item => { html += buildCard(item, name, sec.color, true); });
+  });
+  grid.innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+// ════════════════════════════════════════════════
+// QUIZ MODE
+// ════════════════════════════════════════════════
+function buildQuizItems(){
+  quizItems = [];
+  Object.entries(SECTIONS).forEach(([name, sec]) => {
+    sec.items.forEach(item => quizItems.push({section:name, color:sec.color, ...item}));
+  });
+  quizItems = quizItems.sort(()=>Math.random()-0.5);
+}
+
+function startQuiz(){
+  buildQuizItems();
+  quizIndex = 0;
+  document.getElementById('quiz-modal').classList.add('open');
+  showQuizCard();
+}
+
+function showQuizCard(){
+  if(quizIndex >= quizItems.length) quizIndex = 0;
+  const item = quizItems[quizIndex];
+  document.getElementById('quiz-section').textContent = item.section;
+  document.getElementById('quiz-section').style.color = item.color;
+  document.getElementById('quiz-concept').textContent = item.c;
+  const reveal = document.getElementById('quiz-reveal');
+  reveal.className = '';
+  reveal.textContent = '';
+  document.getElementById('quiz-tags').innerHTML = (item.t||[]).map(t=>`<span class="tag ${t==='real-world'?'real-world':''}">${esc(t)}</span>`).join('');
+}
+
+function revealQuiz(){
+  const item = quizItems[quizIndex];
+  const reveal = document.getElementById('quiz-reveal');
+  reveal.classList.add('shown');
+  reveal.textContent = item.d;
+}
+
+function nextQuiz(){
+  quizIndex = (quizIndex + 1) % quizItems.length;
+  showQuizCard();
+}
+
+function closeQuiz(){
+  document.getElementById('quiz-modal').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════════════
+function toggleTheme(){
+  themeMode = themeMode === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', themeMode);
+  document.getElementById('btn-theme').textContent = themeMode === 'dark' ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem('ckb_theme', themeMode);
+}
+
+// ════════════════════════════════════════════════
+// SHORTCUTS
+// ════════════════════════════════════════════════
+function showShortcuts(){ document.getElementById('shortcuts-modal').classList.add('open'); }
+function closeShortcuts(){ document.getElementById('shortcuts-modal').classList.remove('open'); }
+
+document.addEventListener('keydown', e => {
+  const active = document.activeElement;
+  const inInput = active && (active.tagName==='INPUT'||active.tagName==='TEXTAREA');
+  const quizOpen = document.getElementById('quiz-modal').classList.contains('open');
+  const shortcutsOpen = document.getElementById('shortcuts-modal').classList.contains('open');
+
+  if(e.key==='Escape'){
+    if(quizOpen){ closeQuiz(); return; }
+    if(shortcutsOpen){ closeShortcuts(); return; }
+    document.getElementById('search').value = '';
+    showHome();
+    return;
+  }
+  if(quizOpen){
+    if(e.key===' '||e.key==='ArrowRight'){ e.preventDefault(); nextQuiz(); }
+    if(e.key==='Enter'){ revealQuiz(); }
+    return;
+  }
+  if(inInput) return;
+  if(e.key==='/'){ e.preventDefault(); document.getElementById('search').focus(); }
+  if(e.key==='?'){ showShortcuts(); }
+  if(e.key==='q'||e.key==='Q'){ startQuiz(); }
+  if(e.key==='t'||e.key==='T'){ toggleTheme(); }
+});
+
+// Close modals on backdrop click
+document.getElementById('quiz-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeQuiz(); });
+document.getElementById('shortcuts-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeShortcuts(); });
+
+// ════════════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════════════
+function updateStats(){
+  const totalSec = Object.keys(SECTIONS).length + Object.keys(TABLE_SECTIONS).length;
+  const totalT = Object.values(SECTIONS).reduce((a,s)=>a+s.items.length,0);
+  document.title = `CyberKB — ${totalT} concepts`;
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+buildNav();
+buildHome();
+updateStats();
+</script>
+</body>
+</html>
